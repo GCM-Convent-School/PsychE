@@ -246,7 +246,6 @@ export const KanbanBoard: React.FC = () => {
         .from('PsychE_Counseling_Logs')
         .select(`id, scheduled_date, reason, student_uuid, PsychE_Students (full_name, risk_level, engagement_modifier, student_id)`)
         .eq('session_status', 'Scheduled')
-        .lte('scheduled_date', endStr)
         .order('scheduled_date', { ascending: true });
 
       if (logsError) console.error('Error fetching logs:', logsError);
@@ -279,6 +278,17 @@ export const KanbanBoard: React.FC = () => {
         });
       }
 
+      const laterLogs = (logsData || []).filter(log => !isOverdue(log.scheduled_date) && log.scheduled_date > endStr);
+      if (laterLogs.length > 0 || true) {
+        daysArray.push({
+          dateStr: 'later',
+          label: 'Scheduled for later',
+          isOverdue: false,
+          capacity: { booked: laterLogs.length, total: laterLogs.length },
+          logs: laterLogs
+        });
+      }
+
       setBoardDays(daysArray);
       setLoading(false);
     }
@@ -298,7 +308,7 @@ export const KanbanBoard: React.FC = () => {
     e.preventDefault();
     const logId = e.dataTransfer.getData('text/plain');
     if (!logId) return;
-    if (isOverdueCol) { alert("Cannot drop a session into the 'Overdue' column. Please select a specific date."); return; }
+    if (isOverdueCol || targetDateStr === 'later') { alert("Cannot drop a session into this column. Please select a specific date."); return; }
     if (booked >= total && !window.confirm(`This day is at full capacity (${booked}/${total}). Overbook?`)) return;
 
     setLoading(true);
@@ -421,7 +431,7 @@ export const KanbanBoard: React.FC = () => {
                 <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.5rem', color: day.isOverdue ? '#f87171' : 'var(--color-text)' }}>
                   {day.label}
                 </h3>
-                {!day.isOverdue && (
+                {!day.isOverdue && day.dateStr !== 'later' && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                     <div style={{ flex: 1, height: '3px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
                       <div style={{
@@ -441,6 +451,11 @@ export const KanbanBoard: React.FC = () => {
                       {day.capacity.booked} / {day.capacity.total}
                     </span>
                   </div>
+                )}
+                {day.dateStr === 'later' && (
+                  <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>
+                    {day.logs.length} Upcoming Session{day.logs.length !== 1 ? 's' : ''}
+                  </p>
                 )}
                 {day.isOverdue && (
                   <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#f87171' }}>
