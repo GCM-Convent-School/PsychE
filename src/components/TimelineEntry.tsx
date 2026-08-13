@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { parseISO } from 'date-fns';
 import { BrainCircuit, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 
 export interface TimelineEntryProps {
@@ -173,7 +174,7 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
               return (
                 <div className="print-action" style={{ flex: 1, backgroundColor: tone.bg, color: tone.fg, padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', fontWeight: 500, minWidth: '200px' }}>
                   <span style={{ fontSize: '0.75rem', display: 'block', opacity: 0.8, marginBottom: '4px', letterSpacing: '0.05em' }}>FOLLOW-UP ({st})</span>
-                  {new Date(item.follow_up_date).toLocaleDateString()}
+                  {parseISO(item.follow_up_date).toLocaleDateString()}
                   {!closed && onFollowUpStatus && (
                     <div className="no-print" style={{ display: 'flex', gap: '0.4rem', marginTop: '0.5rem' }}>
                       <button

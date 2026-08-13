@@ -378,7 +378,10 @@ export const LibraryManager: React.FC = () => {
     if (error) { showToast('Save failed: ' + error.message, 'error'); }
     else {
       setSelectedModule(prev => prev ? { ...prev, ...updates } : prev);
-      await fetchModules(); // refresh counts & list
+      // Merge into the already-loaded list locally — these fields never
+      // affect question_count, so there's no need to refetch every module
+      // (and its counts) from the network on every field blur.
+      setModules(prev => prev.map(m => m.id === selectedId ? { ...m, ...updates } : m));
     }
   };
 
@@ -452,7 +455,7 @@ export const LibraryManager: React.FC = () => {
     else {
       showToast('Module locked successfully');
       setSelectedModule(prev => prev ? { ...prev, is_locked: true } : prev);
-      await fetchModules();
+      setModules(prev => prev.map(m => m.id === lockModal.moduleId ? { ...m, is_locked: true } : m));
     }
     setLockModal({ open: false, moduleId: null });
   };
@@ -504,8 +507,12 @@ export const LibraryManager: React.FC = () => {
         item.id === q.id ? { ...item, is_active: !newVal } : item
       ));
       showToast('Toggle failed', 'error');
-    } else {
-      await fetchModules(); // refresh count
+    } else if (selectedId) {
+      // Adjust the active-question count locally instead of refetching
+      // every module + recomputing all counts from the network.
+      setModules(prev => prev.map(m =>
+        m.id === selectedId ? { ...m, question_count: m.question_count + (newVal ? 1 : -1) } : m
+      ));
     }
   };
 
@@ -518,9 +525,10 @@ export const LibraryManager: React.FC = () => {
       .eq('id', q.id);
     if (error) { showToast('Delete failed', 'error'); }
     else {
+      // Deletion is only ever offered for inactive questions, so
+      // question_count (active-only) never changes — no refetch needed.
       setQuestions(prev => prev.filter(item => item.id !== q.id));
       showToast('Question deleted');
-      await fetchModules();
     }
     setDeleteQModal({ open: false, question: null });
   };
@@ -542,7 +550,9 @@ export const LibraryManager: React.FC = () => {
 
     if (error || !data) { showToast('Failed to add question', 'error'); return; }
     setQuestions(prev => [...prev, data]);
-    await fetchModules();
+    setModules(prev => prev.map(m =>
+      m.id === selectedId ? { ...m, question_count: m.question_count + 1 } : m
+    ));
   };
 
   // ==========================================================================

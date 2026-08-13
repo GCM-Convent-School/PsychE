@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, AlertCircle, CheckCircle2, XCircle, Trash2, Calendar, CalendarClock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { parseISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
-import { getAvailableCapacityForDateRange } from '../lib/capacity';
-import { isOverdue } from '../utils/dateFormatter';
+import { getAvailableCapacityForDateRange, toLocalDateStr } from '../lib/capacity';
+import { isOverdue, getWeekdayName, isSunday } from '../utils/dateFormatter';
 
 const container = {
   hidden: { opacity: 0 },
@@ -112,13 +113,19 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({ studentName, currentD
             type="date"
             className="input"
             value={selectedDate}
-            min={new Date().toISOString().split('T')[0]}
+            min={toLocalDateStr(new Date())}
             onChange={e => setSelectedDate(e.target.value)}
             style={{ fontSize: '1rem', padding: '0.75rem 1rem', letterSpacing: '0.03em' }}
           />
           {selectedDate && (
-            <p style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
+            <p style={{
+              display: 'flex', alignItems: 'center', gap: '0.35rem',
+              marginTop: '0.5rem', fontSize: '0.8125rem', fontWeight: isSunday(selectedDate) ? 700 : 400,
+              color: isSunday(selectedDate) ? '#f87171' : 'var(--color-text-muted)'
+            }}>
+              {isSunday(selectedDate) && <AlertCircle size={13} />}
               {new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(selectedDate + 'T12:00:00'))}
+              {isSunday(selectedDate) ? ' — Sunday' : ''}
             </p>
           )}
         </div>
@@ -271,8 +278,11 @@ export const KanbanBoard: React.FC = () => {
         const cap = capacityData[dStr] ?? { total: 7, booked: dayLogs.length, available: Math.max(0, 7 - dayLogs.length) };
         daysArray.push({
           dateStr: dStr,
-          label: i === 0 ? 'Today' : new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d),
+          label: i === 0
+            ? `Today · ${getWeekdayName(dStr, 'short')}`
+            : `${getWeekdayName(dStr, 'short')} · ${new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d)}`,
           isOverdue: false,
+          isSundayCol: isSunday(dStr),
           capacity: cap,
           logs: dayLogs
         });
@@ -327,8 +337,10 @@ export const KanbanBoard: React.FC = () => {
     e.stopPropagation();
     setLoading(true);
     try {
-      await supabase.from('PsychE_Counseling_Logs').update({ session_status: 'No_Show' }).eq('id', logId);
-      await supabase.from('PsychE_Students').update({ engagement_modifier: currentEngagement - 1 }).eq('id', studentUuid);
+      const { error: logError } = await supabase.from('PsychE_Counseling_Logs').update({ session_status: 'No_Show' }).eq('id', logId);
+      if (logError) throw logError;
+      const { error: studentError } = await supabase.from('PsychE_Students').update({ engagement_modifier: currentEngagement - 1 }).eq('id', studentUuid);
+      if (studentError) throw studentError;
       setRefreshKey(prev => prev + 1);
     } catch (error) {
       alert('Failed to mark session as No-Show.');
@@ -353,7 +365,7 @@ export const KanbanBoard: React.FC = () => {
   const handleRescheduleConfirm = async (newDate: string) => {
     if (!rescheduleTarget) return;
 
-    const selectedDate = new Date(newDate);
+    const selectedDate = parseISO(newDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -414,7 +426,9 @@ export const KanbanBoard: React.FC = () => {
                 backgroundColor: 'rgba(24, 27, 33, 0.45)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                border: day.isOverdue ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(255,255,255,0.06)',
+                border: day.isOverdue
+                  ? '1px solid rgba(239,68,68,0.2)'
+                  : day.isSundayCol ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(255,255,255,0.06)',
                 borderRadius: 'var(--radius-lg)',
                 display: 'flex', flexDirection: 'column',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.15)'
@@ -424,11 +438,18 @@ export const KanbanBoard: React.FC = () => {
               <div style={{
                 padding: '1rem 1.25rem',
                 borderBottom: '1px solid rgba(255,255,255,0.07)',
-                backgroundColor: day.isOverdue ? 'rgba(239,68,68,0.12)' : 'rgba(0,0,0,0.15)',
+                backgroundColor: day.isOverdue
+                  ? 'rgba(239,68,68,0.12)'
+                  : day.isSundayCol ? 'rgba(245,158,11,0.08)' : 'rgba(0,0,0,0.15)',
                 borderTopLeftRadius: 'var(--radius-lg)',
                 borderTopRightRadius: 'var(--radius-lg)'
               }}>
-                <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.5rem', color: day.isOverdue ? '#f87171' : 'var(--color-text)' }}>
+                <h3 style={{
+                  display: 'flex', alignItems: 'center', gap: '0.4rem',
+                  fontWeight: 700, fontSize: '1rem', marginBottom: '0.5rem',
+                  color: day.isOverdue ? '#f87171' : day.isSundayCol ? '#f59e0b' : 'var(--color-text)'
+                }}>
+                  {day.isSundayCol && <AlertCircle size={14} />}
                   {day.label}
                 </h3>
                 {!day.isOverdue && day.dateStr !== 'later' && (

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Search, Printer, ArrowLeft, CheckSquare, Square, Calendar, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Users, Search, Printer, ArrowLeft, CheckSquare, Square, Calendar, ChevronDown, ChevronUp, X, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
-import { getAvailableCapacityForDateRange } from '../lib/capacity';
+import { getAvailableCapacityForDateRange, toLocalDateStr } from '../lib/capacity';
+import { getWeekdayName, isSunday } from '../utils/dateFormatter';
 
 const container = {
   hidden: { opacity: 0 },
@@ -45,7 +46,7 @@ export const StudentDirectory: React.FC = () => {
 
   // ── Bulk Scheduler State ──
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
-  const [schedStartDate, setSchedStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [schedStartDate, setSchedStartDate] = useState(toLocalDateStr(new Date()));
   const [schedSelectedIds, setSchedSelectedIds] = useState<Set<string>>(new Set());
   const [scheduling, setScheduling] = useState(false);
   const [schedSearchQuery, setSchedSearchQuery] = useState('');
@@ -226,12 +227,11 @@ export const StudentDirectory: React.FC = () => {
     setScheduling(true);
     try {
       const initialSelectedStudents = students.filter(s => schedSelectedIds.has(s.id));
-      const todayStr = new Date().toISOString().split('T')[0];
       const { data: conflicts, error: conflictError } = await supabase
         .from('PsychE_Counseling_Logs')
         .select('student_uuid')
         .in('student_uuid', initialSelectedStudents.map(s => s.id))
-        .or(`session_status.eq.Scheduled,session_status.eq.Pending,scheduled_date.gte.${todayStr}`);
+        .in('session_status', ['Scheduled', 'Pending']);
 
       if (conflictError) throw conflictError;
       const conflictedUuids = new Set(conflicts?.map(c => c.student_uuid) || []);
@@ -316,7 +316,18 @@ export const StudentDirectory: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => { setIsSchedulerOpen(v => !v); setSchedSearchQuery(''); }}
+              onClick={() => {
+                setIsSchedulerOpen(v => {
+                  const next = !v;
+                  if (next) {
+                    // Carry the directory's current selection into the scheduler panel
+                    // so the user doesn't have to re-pick the same students.
+                    setSchedSelectedIds(new Set(selectedIds));
+                    setSchedSearchQuery('');
+                  }
+                  return next;
+                });
+              }}
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1.125rem', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 600, border: '1px solid rgba(94,106,210,0.35)', backgroundColor: isSchedulerOpen ? 'rgba(94,106,210,0.18)' : 'rgba(94,106,210,0.08)', color: 'var(--color-primary)', cursor: 'pointer', transition: 'all 0.2s ease' }}
             >
               <Calendar size={16} />
@@ -373,10 +384,21 @@ export const StudentDirectory: React.FC = () => {
                       className="input"
                       value={schedStartDate}
                       onChange={e => setSchedStartDate(e.target.value)}
-                      style={{ marginBottom: '1rem' }}
+                      style={{ marginBottom: '0.4rem' }}
                     />
+                    {schedStartDate && (
+                      <p style={{
+                        display: 'flex', alignItems: 'center', gap: '0.3rem',
+                        fontSize: '0.8125rem', fontWeight: 600, marginBottom: '0.75rem',
+                        color: isSunday(schedStartDate) ? '#f87171' : 'var(--color-text-muted)'
+                      }}>
+                        {isSunday(schedStartDate) && <AlertTriangle size={13} />}
+                        {getWeekdayName(schedStartDate)}
+                        {isSunday(schedStartDate) ? ' — Sunday' : ''}
+                      </p>
+                    )}
                     <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem', lineHeight: 1.5 }}>
-                      The system will start from this date and cascade sessions forward through available capacity.
+                      The system will start from this date and cascade sessions forward through available capacity, including weekends and holidays — double-check the days it lands on.
                     </p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', backgroundColor: 'rgba(94,106,210,0.1)', borderRadius: 'var(--radius-md)', marginBottom: '1rem', border: '1px solid rgba(94,106,210,0.2)' }}>
                       <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Selected</span>

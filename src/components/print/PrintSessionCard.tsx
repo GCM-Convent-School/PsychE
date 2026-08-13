@@ -9,6 +9,7 @@
 // =============================================================================
 
 import React from 'react';
+import { parseISO } from 'date-fns';
 
 export interface PrintSessionCardProps {
   log: any;
@@ -94,7 +95,7 @@ export const PrintSessionCard: React.FC<PrintSessionCardProps> = ({
         {(action || log.follow_up_date) && (
           <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', fontSize: '0.875rem', backgroundColor: '#f9f9f9', padding: '0.75rem', borderLeft: '2px solid #ccc' }}>
             {action && <div><strong>Action:</strong> {action}</div>}
-            {log.follow_up_date && <div><strong>Scheduled Follow-up:</strong> {new Date(log.follow_up_date).toLocaleDateString()}</div>}
+            {log.follow_up_date && <div><strong>Scheduled Follow-up:</strong> {parseISO(log.follow_up_date).toLocaleDateString()}</div>}
           </div>
         )}
       </div>

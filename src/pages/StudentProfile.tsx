@@ -500,10 +500,12 @@ export const StudentProfile: React.FC = () => {
   const handleToggleTag = async (tag: any) => {
     const hasTag = studentTags.some(t => t.id === tag.id);
     if (hasTag) {
-      await supabase.from('PsychE_Student_Tags').delete().eq('student_uuid', student.id).eq('tag_id', tag.id);
+      const { error } = await supabase.from('PsychE_Student_Tags').delete().eq('student_uuid', student.id).eq('tag_id', tag.id);
+      if (error) { alert(`Could not remove tag: ${error.message}`); return; }
       setStudentTags(studentTags.filter(t => t.id !== tag.id));
     } else {
-      await supabase.from('PsychE_Student_Tags').insert([{ student_uuid: student.id, tag_id: tag.id }]);
+      const { error } = await supabase.from('PsychE_Student_Tags').insert([{ student_uuid: student.id, tag_id: tag.id }]);
+      if (error) { alert(`Could not add tag: ${error.message}`); return; }
       setStudentTags([...studentTags, tag]);
     }
   };

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Camera, ArrowLeft, Save, User, Edit2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { toLocalDateStr } from '../lib/capacity';
 import { toTitleCase } from '../utils/stringFormatter';
 import { isValidStudentId, STUDENT_ID_PATTERN, STUDENT_ID_HINT, STUDENT_ID_PLACEHOLDER } from '../utils/studentId';
 
@@ -26,7 +27,7 @@ export const AddStudent: React.FC = () => {
   const [email, setEmail] = useState('');
   const [course, setCourse] = useState('');
   const [availableCourses, setAvailableCourses] = useState<any[]>([]);
-  const [enrolledDate, setEnrolledDate] = useState(new Date().toISOString().split('T')[0]);
+  const [enrolledDate, setEnrolledDate] = useState(toLocalDateStr(new Date()));
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
   useEffect(() => {

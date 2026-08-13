@@ -56,6 +56,31 @@ export const parseInputDate = (value: string | null | undefined): string | null 
 };
 
 /**
+ * Returns the weekday name for a date (e.g. "Sunday" or "Sun").
+ * Accepts a `YYYY-MM-DD` string, an ISO string, or a Date.
+ */
+export const getWeekdayName = (
+  dateInput: string | Date | null | undefined,
+  style: 'short' | 'long' = 'long'
+): string => {
+  if (!dateInput) return '';
+  const dateObj = typeof dateInput === 'string' ? parseISO(dateInput) : dateInput;
+  if (!isValid(dateObj)) return '';
+  return format(dateObj, style === 'long' ? 'EEEE' : 'EEE');
+};
+
+/**
+ * True if the given date falls on a Sunday — used to flag likely-holiday
+ * dates in scheduling UI so a counsellor notices before booking on one.
+ */
+export const isSunday = (dateInput: string | Date | null | undefined): boolean => {
+  if (!dateInput) return false;
+  const dateObj = typeof dateInput === 'string' ? parseISO(dateInput) : dateInput;
+  if (!isValid(dateObj)) return false;
+  return dateObj.getDay() === 0;
+};
+
+/**
  * Checks if a given date string is strictly overdue (before today).
  * Uses explicit parsing to handle database strings accurately and avoid locale issues.
  */

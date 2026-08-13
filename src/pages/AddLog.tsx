@@ -4,8 +4,9 @@ import { ArrowLeft, Save, Sparkles, CheckCircle, Calendar as CalendarIcon, FileT
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
-import { getAvailableCapacityForDateRange } from '../lib/capacity';
+import { getAvailableCapacityForDateRange, toLocalDateStr } from '../lib/capacity';
 import { toSentenceCase } from '../utils/stringFormatter';
+import { getWeekdayName, isSunday } from '../utils/dateFormatter';
 import { AssessmentWizard } from '../components/AssessmentWizard';
 import { NextTimeNote, NotePrompt } from '../components/MiniNotes';
 import { createNote, fetchOpenNotes, setNoteDone } from '../lib/studentNotes';
@@ -144,7 +145,8 @@ export const AddLog: React.FC = () => {
         const dStr = `${y}-${m}-${day}`;
         arr.push({
           dateStr: dStr,
-          label: i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+          label: i === 0 ? `Today · ${getWeekdayName(dStr, 'short')}` : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+          isSundayCol: isSunday(dStr),
           capacity: cap[dStr] || { total: 7, booked: 0, available: 7 }
         });
       }
@@ -346,7 +348,7 @@ export const AddLog: React.FC = () => {
         const { data, error } = await supabase.from('PsychE_Counseling_Logs').insert([
           {
             student_uuid: studentUuid,
-            scheduled_date: new Date().toISOString().split('T')[0],
+            scheduled_date: toLocalDateStr(new Date()),
             ...logUpdateData
           }
         ]).select().single();
@@ -360,7 +362,7 @@ export const AddLog: React.FC = () => {
         // UTC midnight natively, shifting to the previous local day for
         // negative-offset timezones (BUG-001).
         const followUpIso = parseISO(followUpDate).toISOString();
-        await supabase.from('PsychE_Counseling_Logs').insert([
+        const { error: followUpError } = await supabase.from('PsychE_Counseling_Logs').insert([
           {
             student_uuid: studentUuid,
             counselor_name: counselorName,
@@ -371,6 +373,10 @@ export const AddLog: React.FC = () => {
             interaction_type: 'Session'
           }
         ]);
+        if (followUpError) {
+          console.error('Follow-up scheduling failed:', followUpError);
+          alert('Log saved, but the follow-up session could not be scheduled. Please schedule it manually.');
+        }
       }
       
       const savedStudent = students.find(s => s.id === studentUuid);
@@ -609,14 +615,26 @@ export const AddLog: React.FC = () => {
 
               {useCustomDate ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <input 
-                    type="date" 
-                    className="input" 
+                  <input
+                    type="date"
+                    className="input"
                     style={{ width: '100%', padding: '0.75rem' }}
                     value={followUpDate}
                     onChange={(e) => setFollowUpDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={toLocalDateStr(new Date())}
                   />
+                  {followUpDate && (
+                    <p style={{
+                      display: 'flex', alignItems: 'center', gap: '0.3rem',
+                      fontSize: '0.8125rem', fontWeight: isSunday(followUpDate) ? 700 : 400,
+                      marginTop: '0.4rem',
+                      color: isSunday(followUpDate) ? '#f87171' : 'var(--color-text-muted)'
+                    }}>
+                      {isSunday(followUpDate) && <AlertTriangle size={13} />}
+                      {getWeekdayName(followUpDate)}
+                      {isSunday(followUpDate) ? ' — Sunday' : ''}
+                    </p>
+                  )}
                 </motion.div>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.5rem' }}>
@@ -637,8 +655,8 @@ export const AddLog: React.FC = () => {
                         style={{
                           padding: '0.75rem',
                           borderRadius: 'var(--radius-md)',
-                          border: `1px solid ${isSelected ? 'var(--color-primary)' : isFull ? 'rgba(239, 68, 68, 0.3)' : 'var(--color-border)'}`,
-                          backgroundColor: isSelected ? 'rgba(94, 106, 210, 0.2)' : isFull ? 'rgba(239, 68, 68, 0.05)' : 'rgba(24, 27, 33, 0.5)',
+                          border: `1px solid ${isSelected ? 'var(--color-primary)' : isFull ? 'rgba(239, 68, 68, 0.3)' : day.isSundayCol ? 'rgba(245,158,11,0.3)' : 'var(--color-border)'}`,
+                          backgroundColor: isSelected ? 'rgba(94, 106, 210, 0.2)' : isFull ? 'rgba(239, 68, 68, 0.05)' : day.isSundayCol ? 'rgba(245,158,11,0.06)' : 'rgba(24, 27, 33, 0.5)',
                           cursor: 'pointer',
                           display: 'flex',
                           flexDirection: 'column',
@@ -646,7 +664,7 @@ export const AddLog: React.FC = () => {
                           textAlign: 'center'
                         }}
                       >
-                        <span style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 400, color: isFull && !isSelected ? 'var(--color-danger)' : 'inherit' }}>{day.label}</span>
+                        <span style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 400, color: isFull && !isSelected ? 'var(--color-danger)' : day.isSundayCol && !isSelected ? '#f59e0b' : 'inherit' }}>{day.label}</span>
                         <span style={{ fontSize: '0.75rem', color: isFull && !isSelected ? 'var(--color-danger)' : 'var(--color-text-muted)', marginTop: '4px' }}>{day.capacity.booked}/{day.capacity.total}</span>
                       </div>
                     );

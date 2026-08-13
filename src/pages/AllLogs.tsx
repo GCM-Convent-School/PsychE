@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { ArrowLeft, Clock, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -9,35 +9,65 @@ const container = {
   show: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
 
+const PAGE_SIZE = 25;
+
 export const AllLogs: React.FC = () => {
   const navigate = useNavigate();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchLogsPage = useCallback(async (pageNum: number) => {
+    const from = pageNum * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from('PsychE_Counseling_Logs')
+      .select(`
+        id,
+        reason,
+        session_date,
+        student_uuid,
+        PsychE_Students (full_name, student_id)
+      `)
+      .order('session_date', { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+    return data ?? [];
+  }, []);
 
   useEffect(() => {
-    async function fetchAllLogs() {
+    (async () => {
+      setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('PsychE_Counseling_Logs')
-          .select(`
-            id,
-            reason,
-            session_date,
-            student_uuid,
-            PsychE_Students (full_name, student_id)
-          `)
-          .order('session_date', { ascending: false });
-
-        if (error) throw error;
-        setLogs(data || []);
+        const data = await fetchLogsPage(0);
+        setLogs(data);
+        setPage(0);
+        setHasMore(data.length === PAGE_SIZE);
       } catch (error) {
         console.error('Error fetching all logs:', error);
       } finally {
         setLoading(false);
       }
+    })();
+  }, [fetchLogsPage]);
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    try {
+      const data = await fetchLogsPage(nextPage);
+      setLogs(prev => [...prev, ...data]);
+      setPage(nextPage);
+      setHasMore(data.length === PAGE_SIZE);
+    } catch (error) {
+      console.error('Error fetching more logs:', error);
+    } finally {
+      setLoadingMore(false);
     }
-    fetchAllLogs();
-  }, []);
+  };
 
   const getColorForReason = (reason: string) => {
     if (reason.toLowerCase().includes('stress')) return '#e25b5b';
@@ -95,6 +125,31 @@ export const AllLogs: React.FC = () => {
                 </div>
               </motion.div>
             ))}
+          </div>
+        )}
+        {!loading && hasMore && (
+          <div className="flex justify-center" style={{ marginTop: '1.25rem' }}>
+            <button
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="btn btn-secondary"
+              style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              {loadingMore ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                    style={{ display: 'inline-flex' }}
+                  >
+                    <Loader2 size={14} />
+                  </motion.div>
+                  Loading…
+                </>
+              ) : (
+                'Load More'
+              )}
+            </button>
           </div>
         )}
       </motion.div>

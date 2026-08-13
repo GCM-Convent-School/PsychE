@@ -22,6 +22,8 @@ export const Navbar: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchSearchResults = async () => {
       if (searchQuery.trim().length < 2) {
         setSearchResults([]);
@@ -29,12 +31,16 @@ export const Navbar: React.FC = () => {
       }
 
       setIsSearching(true);
+      // Strip PostgREST filter-syntax characters so a comma/parenthesis in the
+      // search text can't change the shape of the .or() clause below.
+      const escapedQuery = searchQuery.replace(/[,()]/g, '');
       const { data, error } = await supabase
         .from('PsychE_Students')
         .select('id, full_name, student_id')
-        .or(`full_name.ilike.%${searchQuery}%,student_id.ilike.%${searchQuery}%,mobile.ilike.%${searchQuery}%`)
+        .or(`full_name.ilike.%${escapedQuery}%,student_id.ilike.%${escapedQuery}%,mobile.ilike.%${escapedQuery}%`)
         .limit(5);
 
+      if (cancelled) return;
       if (!error && data) {
         setSearchResults(data);
       }
@@ -42,7 +48,7 @@ export const Navbar: React.FC = () => {
     };
 
     const debounceTimer = setTimeout(fetchSearchResults, 300);
-    return () => clearTimeout(debounceTimer);
+    return () => { cancelled = true; clearTimeout(debounceTimer); };
   }, [searchQuery]);
 
   const handleSelectStudent = (studentId: string) => {

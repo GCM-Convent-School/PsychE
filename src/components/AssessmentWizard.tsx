@@ -189,7 +189,8 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
         responses: Object.fromEntries(
           Object.entries(answersToSave).map(([qid, val]) => {
             const q = questionsToSave.find(x => x.id === qid);
-            return [q ? q.prompt_text : qid, val];
+            const scored = q?.is_reverse_scored ? 5 - val : val;
+            return [q ? q.prompt_text : qid, scored];
           })
         )
       };
@@ -253,6 +254,18 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
     }
   };
 
+  // Persist whatever's been answered if the wizard unmounts some way other
+  // than its own close button (e.g. a parent-level navigation change) —
+  // otherwise in-progress answers vanish with no warning.
+  useEffect(() => {
+    return () => {
+      if (Object.keys(latestAnswers.current).length > 0 && !isCompletedRef.current) {
+        saveDraft(latestAnswers.current, latestQuestions.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleFinalSubmit = async () => {
     if (sampledQuestions.length === 0) return;
     setSaving(true);
@@ -280,7 +293,8 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
         responses: Object.fromEntries(
           Object.entries(answers).map(([qid, val]) => {
             const q = sampledQuestions.find(x => x.id === qid);
-            return [q ? q.prompt_text : qid, val];
+            const scored = q?.is_reverse_scored ? 5 - val : val;
+            return [q ? q.prompt_text : qid, scored];
           })
         )
       };
@@ -416,7 +430,7 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
                 + Add New Questions to Library
               </button>
               
-              <button onClick={onClose} className="btn btn-secondary w-full">Close</button>
+              <button onClick={() => { saveDraft().then(() => onClose()); }} className="btn btn-secondary w-full">Close</button>
             </>
           ) : (
             <form onSubmit={handleAddNewQuestion} style={{ textAlign: 'left' }}>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, CheckSquare, Square } from 'lucide-react';
+import { ArrowLeft, Calendar, CheckSquare, Square, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
-import { getAvailableCapacityForDateRange } from '../lib/capacity';
+import { getAvailableCapacityForDateRange, toLocalDateStr } from '../lib/capacity';
+import { getWeekdayName, isSunday } from '../utils/dateFormatter';
 
 const container = {
   hidden: { opacity: 0 },
@@ -26,7 +27,7 @@ export const BulkSchedule: React.FC = () => {
   
   // Selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(toLocalDateStr(new Date()));
 
   useEffect(() => {
     async function fetchData() {
@@ -66,12 +67,11 @@ export const BulkSchedule: React.FC = () => {
     try {
       const initialSelectedStudents = students.filter(s => selectedIds.has(s.id));
       
-      const todayStr = new Date().toISOString().split('T')[0];
       const { data: conflicts, error: conflictError } = await supabase
         .from('PsychE_Counseling_Logs')
         .select('student_uuid')
         .in('student_uuid', initialSelectedStudents.map(s => s.id))
-        .or(`session_status.eq.Scheduled,session_status.eq.Pending,scheduled_date.gte.${todayStr}`);
+        .in('session_status', ['Scheduled', 'Pending']);
         
       if (conflictError) throw conflictError;
       
@@ -167,13 +167,24 @@ export const BulkSchedule: React.FC = () => {
           
           <div className="mb-6">
             <label className="text-h3" style={{ fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Start Date</label>
-            <input 
-              type="date" 
-              className="input" 
+            <input
+              type="date"
+              className="input"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
-            <p className="text-muted mt-2" style={{ fontSize: '0.75rem' }}>The system will start looking for available capacity on this date and cascade forward.</p>
+            {startDate && (
+              <p style={{
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                fontSize: '0.8125rem', fontWeight: 600, marginTop: '0.4rem',
+                color: isSunday(startDate) ? '#f87171' : 'var(--color-text-muted)'
+              }}>
+                {isSunday(startDate) && <AlertTriangle size={13} />}
+                {getWeekdayName(startDate)}
+                {isSunday(startDate) ? ' — Sunday' : ''}
+              </p>
+            )}
+            <p className="text-muted mt-2" style={{ fontSize: '0.75rem' }}>The system will start looking for available capacity on this date and cascade forward, including weekends and holidays — double-check the days it lands on.</p>
           </div>
 
           <div className="mb-6">
