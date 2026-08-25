@@ -279,7 +279,8 @@ export const Navbar: React.FC = () => {
         >
           <Activity size={20} />
         </motion.button>
-        <motion.button 
+        <motion.button
+          onClick={() => { localStorage.removeItem('psyche_auth_status'); window.location.reload(); }}
           whileHover={{ scale: 1.1, color: 'var(--color-danger)' }}
           whileTap={{ scale: 0.95 }}
           className="btn btn-secondary" style={{ padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--color-text-muted)' }} title="Logout"

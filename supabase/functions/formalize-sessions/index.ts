@@ -25,7 +25,7 @@
 // =============================================================================
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { corsHeaders } from '../_shared/cors.ts';
+import { buildCorsHeaders } from '../_shared/cors.ts';
 import { redactSessionForFormalization, type RawSession } from '../_shared/redaction.ts';
 import { callGroq, callGemini, generateJsonWithRepair, type CallFn } from '../_shared/llmProviders.ts';
 import { getLoadStats, rankModelsForReport, logModelUsage, type ModelProfile } from '../_shared/modelRouter.ts';
@@ -83,6 +83,7 @@ function callFnFor(profile: ModelProfile, groqKey: string | undefined, geminiKey
 }
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = buildCorsHeaders(req.headers.get('Origin'));
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {

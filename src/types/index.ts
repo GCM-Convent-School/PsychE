@@ -96,7 +96,7 @@ export const DEFAULT_LABELS: QuestionLabels = {
   '4': 'Very true',
 };
 
-export type SessionStatus = 'Scheduled' | 'Completed' | 'Overdue' | 'Cancelled';
+export type SessionStatus = 'Draft' | 'Scheduled' | 'Pending' | 'Completed' | 'Overdue' | 'Cancelled' | 'No_Show';
 export type InteractionType = 'Session' | 'Phone' | 'Email' | 'Walk-in';
 export type FollowUpStatus = 'Pending' | 'Done' | 'Cancelled';
 
