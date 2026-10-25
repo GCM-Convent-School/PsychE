@@ -20,7 +20,8 @@
 //  in place of a hardcoded Groq-then-Gemini fallback: the ranked candidate
 //  list already accounts for today's call volume per model, so a busy day
 //  degrades to a smaller model instead of just failing once Groq's free tier
-//  caps out.
+//  caps out. V13 made the candidate list admin-configurable (Settings page →
+//  PsychE_Settings.ai_models) after Groq retired the hardcoded Llama models.
 //
 //  Deploy:
 //    supabase functions deploy generate-ai-report --project-ref <your-ref>
@@ -34,11 +35,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { buildCorsHeaders } from '../_shared/cors.ts';
 import { buildTelemetrySummary, renderTelemetrySummary } from '../_shared/telemetryLabels.ts';
-import {
-  callGroq, callGemini, generateJsonWithRepair,
-  type CallFn,
-} from '../_shared/llmProviders.ts';
-import { getLoadStats, rankModelsForReport, logModelUsage, type ModelProfile } from '../_shared/modelRouter.ts';
+import { generateJsonWithRepair } from '../_shared/llmProviders.ts';
+import { generateWithFallback, readProviderKeys, availableProvidersFor, logModelUsage } from '../_shared/modelRouter.ts';
 
 const ON_DEMAND_COOLDOWN_HOURS = 24;
 
@@ -104,13 +102,6 @@ function isValidReportShape(obj: any): boolean {
     Array.isArray(obj.next_session_questions) &&
     Array.isArray(obj.ground_level_suggestions)
   );
-}
-
-function callFnFor(profile: ModelProfile, groqKey: string | undefined, geminiKey: string | undefined): CallFn {
-  if (profile.provider === 'groq') {
-    return (system, user) => callGroq(groqKey!, profile.name, system, user, { maxTokens: MAX_OUTPUT_TOKENS, jsonMode: true });
-  }
-  return (system, user) => callGemini(geminiKey!, profile.name, system, user, { maxTokens: MAX_OUTPUT_TOKENS, jsonMode: true });
 }
 
 Deno.serve(async (req: Request) => {
@@ -199,50 +190,30 @@ Deno.serve(async (req: Request) => {
     const anonProfileId = `ANON_${studentUuid}`;
     const userPrompt = buildUserPrompt(anonProfileId, renderTelemetrySummary(summary));
 
-    const groqKey = Deno.env.get('GROQ_API_KEY');
-    const geminiKey = Deno.env.get('GEMINI_API_KEY');
-    const availableProviders = new Set<'groq' | 'gemini'>([
-      ...(groqKey ? (['groq'] as const) : []),
-      ...(geminiKey ? (['gemini'] as const) : []),
-    ]);
-
-    if (availableProviders.size === 0) {
+    const keys = readProviderKeys();
+    if (availableProvidersFor(keys).size === 0) {
       return new Response(
         JSON.stringify({ report: null, error: 'No LLM provider configured (GROQ_API_KEY / GEMINI_API_KEY missing).' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const loadStats = await getLoadStats(supabase);
-    const ranked = rankModelsForReport(loadStats, 'full', availableProviders);
+    const { result, profile: chosenProfile, failures } = await generateWithFallback({
+      supabase, keys, reportType: 'full', maxTokens: MAX_OUTPUT_TOKENS,
+      run: (call) => generateJsonWithRepair(call, SYSTEM_PROMPT, userPrompt, isValidReportShape),
+    });
+    if (failures.length) console.warn('[generate-ai-report] Model attempts failed:', failures);
 
-    let content: Record<string, any> | null = null;
-    let tokensUsed: number | null = null;
-    let modelUsed = '';
-    let chosenProfile: ModelProfile | null = null;
-    let lastError: unknown = null;
-
-    for (const profile of ranked) {
-      try {
-        const call = callFnFor(profile, groqKey, geminiKey);
-        const result = await generateJsonWithRepair(call, SYSTEM_PROMPT, userPrompt, isValidReportShape);
-        content = result.data;
-        tokensUsed = result.tokensUsed;
-        chosenProfile = profile;
-        modelUsed = `${profile.provider}:${profile.name}`;
-        break;
-      } catch (err) {
-        lastError = err;
-      }
-    }
-
-    if (!content || !chosenProfile) {
-      console.error('[generate-ai-report] All candidate models failed:', lastError);
+    if (!result || !chosenProfile) {
       return new Response(
-        JSON.stringify({ report: null, error: 'Unable to generate report right now. Please try again later.' }),
+        JSON.stringify({ report: null, error: `Unable to generate report right now. Tried: ${failures.join('; ')}` }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const content = result.data;
+    const tokensUsed = result.tokensUsed;
+    const modelUsed = `${chosenProfile.provider}:${chosenProfile.name}`;
 
     await logModelUsage(supabase, {
       modelName: chosenProfile.name,

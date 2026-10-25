@@ -242,11 +242,25 @@ is a **local** calendar concept, and the `dedupeFollowUps()` pairing rule that m
 | `src/pages/AddStudent.tsx` | `/add-student`, `/edit-student/:id` | Student create/edit form |
 | `src/pages/AllLogs.tsx` | `/logs` | Chronological log feed |
 | `src/pages/StudentDirectory.tsx` | `/directory` | Filterable student table |
-| `src/pages/Settings.tsx` | `/settings` | PsychE_Settings row editor |
+| `src/pages/Settings.tsx` | `/settings` | PsychE_Settings row editor; tabs: System, Question Library, Global Tags, AI Models (V13) |
 | `src/pages/KanbanBoard.tsx` | `/kanban` | 7-day rolling Kanban planner |
 | `src/pages/BulkSchedule.tsx` | `/bulk-schedule` | Auto-distribute students |
 | `src/pages/Analytics.tsx` | `/analytics` | School-wide aggregate metrics (risk distribution, session health, course breakdown) — not the same as the per-student V5 telemetry engines, see `ARCH_technical-specs.md` §8 |
 | `src/pages/ReportExport.tsx` | `/report` | A4 print view (outside Layout) |
+
+### AI subsystem (V10–V13)
+
+| File | Purpose |
+|---|---|
+| `supabase/functions/generate-ai-report/index.ts` | **V10** Edge Function — per-student AI briefing from banded telemetry (no session text). Called on demand and by `.github/workflows/ai_reports_batch.yml` |
+| `supabase/functions/formalize-sessions/index.ts` | **V12** Edge Function — rewrites a student's unformalized session notes into formal language, one batched call |
+| `supabase/functions/list-models/index.ts` | **V13** Edge Function — read-only; returns the models each provider's API key can use right now, for the Settings → AI Models picker |
+| `supabase/functions/_shared/modelRouter.ts` | **V13** Candidate order + fallback: `PsychE_Settings.ai_models` (admin pick) → `DEFAULT_MODEL_PROFILES` → live-catalogue self-heal on "model not found". `generateWithFallback()` is the only way the functions call an LLM |
+| `supabase/functions/_shared/modelCatalog.ts` | **V13** Live model lists from Groq (`/openai/v1/models`) and Gemini (`/v1beta/models`), filtered to text-generation models |
+| `supabase/functions/_shared/llmProviders.ts` | Raw Groq/Gemini HTTP calls, reasoning-model token headroom, JSON repair pass |
+| `src/lib/aiModels.ts` | **V13** Frontend data access for the model picker (`list-models` + `PsychE_Settings.ai_models`) |
+| `src/components/AIModelSettings.tsx` | **V13** Settings → AI Models tab |
+| `v13_ai_model_settings.sql` | **V13** Adds `PsychE_Settings.ai_models`, widens model-name columns to `VARCHAR(120)`. Folded into `schema/install.sql` |
 
 ---
 

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Settings as SettingsIcon, BookOpen, Tag } from 'lucide-react';
+import { ArrowLeft, Save, Settings as SettingsIcon, BookOpen, Tag, Cpu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { getDailyCapacity } from '../lib/capacity';
 import { LibraryManager } from '../components/LibraryManager';
 import { GlobalTagManager } from '../components/GlobalTagManager';
+import { AIModelSettings } from '../components/AIModelSettings';
 
 const SystemSettingsTab: React.FC = () => {
   const [capacity, setCapacity] = useState<number>(7);
@@ -179,7 +180,7 @@ const container = {
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'system' | 'library' | 'tags'>('system');
+  const [activeTab, setActiveTab] = useState<'system' | 'library' | 'tags' | 'ai'>('system');
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" style={{ padding: '1rem 0', maxWidth: '1000px', margin: '0 auto' }}>
@@ -207,6 +208,7 @@ export const Settings: React.FC = () => {
           { id: 'system',  label: 'System Settings',  Icon: SettingsIcon },
           { id: 'library', label: 'Question Library',  Icon: BookOpen },
           { id: 'tags',    label: 'Global Tags',       Icon: Tag },
+          { id: 'ai',      label: 'AI Models',         Icon: Cpu },
         ] as const).map(({ id, label, Icon }) => (
           <button
             key={id}
@@ -239,6 +241,7 @@ export const Settings: React.FC = () => {
       {activeTab === 'system' && <SystemSettingsTab />}
       {activeTab === 'library' && <LibraryManager />}
       {activeTab === 'tags' && <GlobalTagManager />}
+      {activeTab === 'ai' && <AIModelSettings />}
 
     </motion.div>
   );

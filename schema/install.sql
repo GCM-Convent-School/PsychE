@@ -1,6 +1,6 @@
 -- =============================================================================
 --  PsychE — Complete Database Installer
---  Version 6.5.0 · consolidated 2026-07-30
+--  Version 6.6.0 · consolidated 2026-10-25
 -- =============================================================================
 --
 --  ONE FILE. Paste into the Supabase SQL editor and run. That is the whole
@@ -90,13 +90,14 @@ CREATE TABLE IF NOT EXISTS "PsychE_Settings" (
     id                       INT           PRIMARY KEY DEFAULT 1,
     daily_session_capacity   INT           DEFAULT 15,
     allowed_pins             TEXT          DEFAULT '2001,0987,0999,2580',
-    app_version              VARCHAR(20)   DEFAULT '6.5.0',
+    app_version              VARCHAR(20)   DEFAULT '6.6.0',
     assessment_cooldown_days INT           DEFAULT 30,
+    ai_models                JSONB         NOT NULL DEFAULT '[]'::jsonb,  -- V13: ordered [{provider,name}], [] = router defaults
     created_at               TIMESTAMPTZ   DEFAULT NOW()
 );
 
 INSERT INTO "PsychE_Settings" (id, daily_session_capacity, allowed_pins, app_version, assessment_cooldown_days)
-VALUES (1, 15, '2001,0987,0999,2580', '6.5.0', 30)
+VALUES (1, 15, '2001,0987,0999,2580', '6.6.0', 30)
 ON CONFLICT (id) DO NOTHING;
 
 -- ─── 2.3 Domains (7 psychological scoring domains) ───────────────────────────
@@ -266,7 +267,7 @@ CREATE TABLE IF NOT EXISTS "PsychE_AI_Reports" (
     -- 'on_demand' = counsellor clicked Regenerate · 'cron' = nightly batch
     generation_source VARCHAR(20)   NOT NULL DEFAULT 'on_demand'
                       CHECK (generation_source IN ('on_demand', 'cron')),
-    model_used        VARCHAR(50),
+    model_used        VARCHAR(120),
     generated_at      TIMESTAMPTZ   DEFAULT NOW()
 );
 
@@ -286,7 +287,7 @@ CREATE TABLE IF NOT EXISTS "PsychE_Sanitized_Session_Reports" (
     report_jsonb        JSONB,
     included_telemetry  BOOLEAN       NOT NULL DEFAULT FALSE,
     included_summary    BOOLEAN       NOT NULL DEFAULT FALSE,
-    model_used          VARCHAR(50),
+    model_used          VARCHAR(120),
     generated_at        TIMESTAMPTZ   DEFAULT NOW()
 );
 
@@ -302,7 +303,7 @@ CREATE TABLE IF NOT EXISTS "PsychE_Sanitized_Session_Reports" (
 --  log, not student data; it should outlive the student record it references.
 CREATE TABLE IF NOT EXISTS "PsychE_Model_Usage_Log" (
     id            UUID          PRIMARY KEY DEFAULT uuid_generate_v4(),
-    model_name    VARCHAR(50)   NOT NULL,
+    model_name    VARCHAR(120)   NOT NULL,
     provider      VARCHAR(20)   NOT NULL,
     report_type   VARCHAR(20)   NOT NULL CHECK (report_type IN ('summary', 'full', 'session')),
     tokens_used   INT,
@@ -336,7 +337,7 @@ CREATE TABLE IF NOT EXISTS "PsychE_Formalized_Sessions" (
     reason_formal              TEXT,
     student_response_formal    TEXT,
     recommended_action_formal  TEXT,
-    model_used                 VARCHAR(50),
+    model_used                 VARCHAR(120),
     -- One shared value per formalize-sessions invocation — lets you trace which
     -- rows came out of the same batched LLM call without joining through
     -- PsychE_Model_Usage_Log timestamps.
@@ -379,8 +380,9 @@ ALTER TABLE "PsychE_Students" ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DE
 -- PsychE_Settings
 ALTER TABLE "PsychE_Settings" ADD COLUMN IF NOT EXISTS daily_session_capacity INT DEFAULT 15;
 ALTER TABLE "PsychE_Settings" ADD COLUMN IF NOT EXISTS allowed_pins TEXT DEFAULT '2001,0987,0999,2580';
-ALTER TABLE "PsychE_Settings" ADD COLUMN IF NOT EXISTS app_version VARCHAR(20) DEFAULT '6.5.0';
+ALTER TABLE "PsychE_Settings" ADD COLUMN IF NOT EXISTS app_version VARCHAR(20) DEFAULT '6.6.0';
 ALTER TABLE "PsychE_Settings" ADD COLUMN IF NOT EXISTS assessment_cooldown_days INT DEFAULT 30;
+ALTER TABLE "PsychE_Settings" ADD COLUMN IF NOT EXISTS ai_models JSONB NOT NULL DEFAULT '[]'::jsonb;
 ALTER TABLE "PsychE_Settings" ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 -- PsychE_Domains
@@ -471,7 +473,7 @@ ALTER TABLE "PsychE_Student_Notes" ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP
 ALTER TABLE "PsychE_AI_Reports" ADD COLUMN IF NOT EXISTS student_uuid UUID;
 ALTER TABLE "PsychE_AI_Reports" ADD COLUMN IF NOT EXISTS report_jsonb JSONB;
 ALTER TABLE "PsychE_AI_Reports" ADD COLUMN IF NOT EXISTS generation_source VARCHAR(20) DEFAULT 'on_demand';
-ALTER TABLE "PsychE_AI_Reports" ADD COLUMN IF NOT EXISTS model_used VARCHAR(50);
+ALTER TABLE "PsychE_AI_Reports" ADD COLUMN IF NOT EXISTS model_used VARCHAR(120);
 ALTER TABLE "PsychE_AI_Reports" ADD COLUMN IF NOT EXISTS generated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- PsychE_Sanitized_Session_Reports (V11)
@@ -481,11 +483,11 @@ ALTER TABLE "PsychE_Sanitized_Session_Reports" ADD COLUMN IF NOT EXISTS report_t
 ALTER TABLE "PsychE_Sanitized_Session_Reports" ADD COLUMN IF NOT EXISTS report_jsonb JSONB;
 ALTER TABLE "PsychE_Sanitized_Session_Reports" ADD COLUMN IF NOT EXISTS included_telemetry BOOLEAN DEFAULT FALSE;
 ALTER TABLE "PsychE_Sanitized_Session_Reports" ADD COLUMN IF NOT EXISTS included_summary BOOLEAN DEFAULT FALSE;
-ALTER TABLE "PsychE_Sanitized_Session_Reports" ADD COLUMN IF NOT EXISTS model_used VARCHAR(50);
+ALTER TABLE "PsychE_Sanitized_Session_Reports" ADD COLUMN IF NOT EXISTS model_used VARCHAR(120);
 ALTER TABLE "PsychE_Sanitized_Session_Reports" ADD COLUMN IF NOT EXISTS generated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- PsychE_Model_Usage_Log (V11)
-ALTER TABLE "PsychE_Model_Usage_Log" ADD COLUMN IF NOT EXISTS model_name VARCHAR(50);
+ALTER TABLE "PsychE_Model_Usage_Log" ADD COLUMN IF NOT EXISTS model_name VARCHAR(120);
 ALTER TABLE "PsychE_Model_Usage_Log" ADD COLUMN IF NOT EXISTS provider VARCHAR(20);
 ALTER TABLE "PsychE_Model_Usage_Log" ADD COLUMN IF NOT EXISTS report_type VARCHAR(20);
 ALTER TABLE "PsychE_Model_Usage_Log" ADD COLUMN IF NOT EXISTS tokens_used INT;
@@ -498,7 +500,7 @@ ALTER TABLE "PsychE_Formalized_Sessions" ADD COLUMN IF NOT EXISTS student_uuid U
 ALTER TABLE "PsychE_Formalized_Sessions" ADD COLUMN IF NOT EXISTS reason_formal TEXT;
 ALTER TABLE "PsychE_Formalized_Sessions" ADD COLUMN IF NOT EXISTS student_response_formal TEXT;
 ALTER TABLE "PsychE_Formalized_Sessions" ADD COLUMN IF NOT EXISTS recommended_action_formal TEXT;
-ALTER TABLE "PsychE_Formalized_Sessions" ADD COLUMN IF NOT EXISTS model_used VARCHAR(50);
+ALTER TABLE "PsychE_Formalized_Sessions" ADD COLUMN IF NOT EXISTS model_used VARCHAR(120);
 ALTER TABLE "PsychE_Formalized_Sessions" ADD COLUMN IF NOT EXISTS batch_id UUID;
 ALTER TABLE "PsychE_Formalized_Sessions" ADD COLUMN IF NOT EXISTS formalized_at TIMESTAMPTZ DEFAULT NOW();
 

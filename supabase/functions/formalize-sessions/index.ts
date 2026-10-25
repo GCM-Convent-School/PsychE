@@ -14,7 +14,7 @@
 //
 //  "Only a single AI run per student, saves AI overhead": PsychE_Formalized_
 //  Sessions.log_id is UNIQUE, so step 3 below is a single indexed lookup, and
-//  if nothing is pending we return before ever calling getLoadStats/the
+//  if nothing is pending we return before ever calling the model router/the
 //  provider — a student with nothing new costs zero LLM calls, not just zero
 //  writes.
 //
@@ -27,8 +27,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { buildCorsHeaders } from '../_shared/cors.ts';
 import { redactSessionForFormalization, type RawSession } from '../_shared/redaction.ts';
-import { callGroq, callGemini, generateJsonWithRepair, type CallFn } from '../_shared/llmProviders.ts';
-import { getLoadStats, rankModelsForReport, logModelUsage, type ModelProfile } from '../_shared/modelRouter.ts';
+import { generateJsonWithRepair } from '../_shared/llmProviders.ts';
+import { generateWithFallback, readProviderKeys, availableProvidersFor, logModelUsage } from '../_shared/modelRouter.ts';
 
 // Sized for a first-time backlog covering many sessions at once, not one
 // paragraph — this function never condenses, so output scales with how many
@@ -73,13 +73,6 @@ function isValidShape(pendingIds: Set<string>, expectedCount: number) {
     if (obj.sessions.length !== expectedCount) return false;
     return obj.sessions.every((s: any) => s && typeof s.id === 'string' && pendingIds.has(s.id));
   };
-}
-
-function callFnFor(profile: ModelProfile, groqKey: string | undefined, geminiKey: string | undefined): CallFn {
-  if (profile.provider === 'groq') {
-    return (system, user) => callGroq(groqKey!, profile.name, system, user, { maxTokens: MAX_OUTPUT_TOKENS, jsonMode: true });
-  }
-  return (system, user) => callGemini(geminiKey!, profile.name, system, user, { maxTokens: MAX_OUTPUT_TOKENS, jsonMode: true });
 }
 
 Deno.serve(async (req: Request) => {
@@ -143,49 +136,30 @@ Deno.serve(async (req: Request) => {
     const pendingIds = new Set(pending.map((l: RawSession) => l.id));
     const userPrompt = buildUserPrompt(redacted);
 
-    const groqKey = Deno.env.get('GROQ_API_KEY');
-    const geminiKey = Deno.env.get('GEMINI_API_KEY');
-    const availableProviders = new Set<'groq' | 'gemini'>([
-      ...(groqKey ? (['groq'] as const) : []),
-      ...(geminiKey ? (['gemini'] as const) : []),
-    ]);
-
-    if (availableProviders.size === 0) {
+    const keys = readProviderKeys();
+    if (availableProvidersFor(keys).size === 0) {
       return new Response(
         JSON.stringify({ formalizedSessions: [], skippedCount, error: 'No LLM provider configured (GROQ_API_KEY / GEMINI_API_KEY missing).' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const loadStats = await getLoadStats(supabase);
-    const ranked = rankModelsForReport(loadStats, 'full', availableProviders);
     const validateShape = isValidShape(pendingIds, pending.length);
+    const { result, profile: chosenProfile, failures } = await generateWithFallback({
+      supabase, keys, reportType: 'full', maxTokens: MAX_OUTPUT_TOKENS,
+      run: (call) => generateJsonWithRepair(call, SYSTEM_PROMPT, userPrompt, validateShape),
+    });
+    if (failures.length) console.warn('[formalize-sessions] Model attempts failed:', failures);
 
-    let sessions: { id: string; reason: string | null; student_response: string | null; recommended_action: string | null }[] | null = null;
-    let tokensUsed: number | null = null;
-    let chosenProfile: ModelProfile | null = null;
-    let lastError: unknown = null;
-
-    for (const profile of ranked) {
-      try {
-        const call = callFnFor(profile, groqKey, geminiKey);
-        const result = await generateJsonWithRepair(call, SYSTEM_PROMPT, userPrompt, validateShape);
-        sessions = result.data.sessions;
-        tokensUsed = result.tokensUsed;
-        chosenProfile = profile;
-        break;
-      } catch (err) {
-        lastError = err;
-      }
-    }
-
-    if (!sessions || !chosenProfile) {
-      console.error('[formalize-sessions] All candidate models failed:', lastError);
+    if (!result || !chosenProfile) {
       return new Response(
-        JSON.stringify({ formalizedSessions: [], skippedCount, error: 'Unable to formalize sessions right now. Please try again later.' }),
+        JSON.stringify({ formalizedSessions: [], skippedCount, error: `Unable to formalize sessions right now. Tried: ${failures.join('; ')}` }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const sessions: { id: string; reason: string | null; student_response: string | null; recommended_action: string | null }[] = result.data.sessions;
+    const tokensUsed = result.tokensUsed;
 
     const modelUsed = `${chosenProfile.provider}:${chosenProfile.name}`;
     const batchId = crypto.randomUUID();

@@ -33,6 +33,15 @@ export interface Settings {
   allowed_pins: string;             // Comma-separated PIN string e.g. "2001,0987"
   app_version: string;              // e.g. "4.0.0"
   assessment_cooldown_days: number; // Default: 30
+  ai_models: AIModelChoice[];       // V13 — ordered, first = primary; [] = router defaults
+}
+
+export type AIProvider = 'groq' | 'gemini';
+
+/** One entry of PsychE_Settings.ai_models — a provider model ID, e.g. "openai/gpt-oss-120b". */
+export interface AIModelChoice {
+  provider: AIProvider;
+  name: string;
 }
 
 export type ModuleType = 'COMPE' | 'PsycheSPA' | 'Custom';

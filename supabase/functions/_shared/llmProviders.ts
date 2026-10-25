@@ -19,6 +19,15 @@ export interface LLMResult {
 
 export type CallFn = (system: string, user: string) => Promise<LLMResult>;
 
+// Reasoning models spend hidden "thinking" tokens out of the same max_tokens
+// budget as the answer. Without headroom, a 900-token report cap can be used
+// up entirely by reasoning and return empty content.
+const REASONING_HEADROOM_TOKENS = 1024;
+
+function isGroqReasoningModel(model: string): boolean {
+  return /gpt-oss/i.test(model);
+}
+
 export async function callGroq(
   apiKey: string,
   model: string,
@@ -36,6 +45,12 @@ export async function callGroq(
     max_tokens: opts.maxTokens,
   };
   if (opts.jsonMode) body.response_format = { type: 'json_object' };
+  if (isGroqReasoningModel(model)) {
+    // A rewrite/summary task needs little deliberation; 'low' keeps latency
+    // and token spend close to the old non-reasoning Llama models.
+    body.reasoning_effort = 'low';
+    body.max_tokens = opts.maxTokens + REASONING_HEADROOM_TOKENS;
+  }
 
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
@@ -66,7 +81,8 @@ export async function callGemini(
         contents: [{ parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
         generationConfig: {
           temperature: opts.temperature ?? 0.4,
-          maxOutputTokens: opts.maxTokens,
+          // Gemini 2.5+ models may think by default; give them the same headroom.
+          maxOutputTokens: opts.maxTokens + REASONING_HEADROOM_TOKENS,
           ...(opts.jsonMode ? { responseMimeType: 'application/json' } : {}),
         },
       }),
@@ -108,9 +124,11 @@ export async function generateJsonWithRepair(
     if (isValidShape(parsed)) return { data: parsed, tokensUsed: first.tokensUsed };
     throw new Error('shape mismatch');
   } catch {
+    // Resend the original instructions and input: a repair prompt that only
+    // carries the broken output has no schema (or source data) to repair against.
     const repaired = await call(
-      'You output invalid or incorrectly-shaped JSON. Return ONLY the corrected valid JSON object matching the schema you were given — no commentary, no markdown fences.',
-      first.content
+      `${systemPrompt}\n\nYour previous reply was invalid or incorrectly-shaped JSON. Return ONLY the corrected valid JSON object matching the schema above — no commentary, no markdown fences.`,
+      `${userPrompt}\n\nYour previous (invalid) reply was:\n${first.content}`
     );
     const parsed = JSON.parse(stripCodeFences(repaired.content));
     if (!isValidShape(parsed)) throw new Error('Model repair pass still produced an invalid shape.');
