@@ -30,10 +30,12 @@ export type RiskLevel = 'Low' | 'Medium' | 'High';
 export interface Settings {
   id: 1;                            // Singleton — always 1
   daily_session_capacity: number;   // Default: 7
-  allowed_pins: string;             // Comma-separated PIN string e.g. "2001,0987"
   app_version: string;              // e.g. "4.0.0"
   assessment_cooldown_days: number; // Default: 30
   ai_models: AIModelChoice[];       // V13 — ordered, first = primary; [] = router defaults
+  school_name: string | null;       // V14 — branding, shown pre-login via PsychE_Public_Branding
+  school_logo_url: string | null;   // V14 — public URL in the "branding" bucket
+  accent_color: string | null;      // V14 — reserved for the Release 2 theme
 }
 
 export type AIProvider = 'groq' | 'gemini';

@@ -3,9 +3,13 @@ import { Search, UserPlus, Activity, LogOut, BookOpen, Users, Settings as Settin
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../lib/auth';
+import { useBranding, PRODUCT_NAME } from '../lib/branding';
 
 export const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const { staff, signOut } = useAuth();
+  const { schoolName } = useBranding();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -97,8 +101,8 @@ export const Navbar: React.FC = () => {
             <BookOpen size={20} />
           </motion.div>
           <div className="flex" style={{ flexDirection: 'column' }}>
-            <span className="navbar-title text-h3" style={{ letterSpacing: '-0.02em', lineHeight: '1.2' }}>UPsych : GCM Edition</span>
-            <span className="navbar-sub text-muted" style={{ fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>GCM Convent School</span>
+            <span className="navbar-title text-h3" style={{ letterSpacing: '-0.02em', lineHeight: '1.2' }}>{PRODUCT_NAME}</span>
+            <span className="navbar-sub text-muted" style={{ fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{schoolName ?? staff?.full_name}</span>
           </div>
         </Link>
       </div>
@@ -280,10 +284,10 @@ export const Navbar: React.FC = () => {
           <Activity size={20} />
         </motion.button>
         <motion.button
-          onClick={() => { localStorage.removeItem('psyche_auth_status'); window.location.reload(); }}
+          onClick={() => { signOut(); }}
           whileHover={{ scale: 1.1, color: 'var(--color-danger)' }}
           whileTap={{ scale: 0.95 }}
-          className="btn btn-secondary" style={{ padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--color-text-muted)' }} title="Logout"
+          className="btn btn-secondary" style={{ padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--color-text-muted)' }} title={staff ? `Sign out ${staff.full_name}` : 'Sign out'} aria-label="Sign out"
         >
           <LogOut size={20} />
         </motion.button>

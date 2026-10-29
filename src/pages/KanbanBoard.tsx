@@ -6,6 +6,7 @@ import { parseISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { getAvailableCapacityForDateRange, toLocalDateStr } from '../lib/capacity';
 import { isOverdue, getWeekdayName, isSunday } from '../utils/dateFormatter';
+import { useDocumentTitle } from '../lib/branding';
 
 const container = {
   hidden: { opacity: 0 },
@@ -224,9 +225,7 @@ export const KanbanBoard: React.FC = () => {
   // Reschedule modal state
   const [rescheduleTarget, setRescheduleTarget] = useState<{ id: string; studentName: string; currentDate: string } | null>(null);
 
-  useEffect(() => {
-    document.title = 'UPsych : GCM Edition | Planner';
-  }, []);
+  useDocumentTitle('Planner');
 
   useEffect(() => {
     async function fetchBoardData() {

@@ -6,7 +6,14 @@
 // This has no effect on who can browse the sites themselves (that's DNS/
 // hosting, not CORS) and none on server-to-server calls (cron, curl), which
 // send no Origin header and are unaffected by CORS either way.
-const ALLOWED_DOMAINS = ['theupliftco.com', 'gcmconventschool.in', 'thefedeli.com'];
+//
+// Release 1 (clone per school): the allowlist is per deployment, not code.
+//   supabase secrets set ALLOWED_DOMAINS=gcmconventschool.in,theupliftco.com
+// Subdomains of each entry are allowed too. localhost is always allowed.
+const ALLOWED_DOMAINS = (Deno.env.get('ALLOWED_DOMAINS') ?? '')
+  .split(',')
+  .map(d => d.trim().toLowerCase())
+  .filter(Boolean);
 
 function isAllowedOrigin(origin: string | null): boolean {
   if (!origin) return false;

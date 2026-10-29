@@ -6,6 +6,7 @@ import { parseISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { getAvailableCapacityForDateRange, toLocalDateStr } from '../lib/capacity';
 import { getWeekdayName, isSunday } from '../utils/dateFormatter';
+import { useBranding, PRODUCT_NAME } from '../lib/branding';
 
 const container = {
   hidden: { opacity: 0 },
@@ -20,6 +21,7 @@ const normalizeCourse = (course: string) => {
 };
 
 export const StudentDirectory: React.FC = () => {
+  const { schoolName } = useBranding();
   const navigate = useNavigate();
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -704,7 +706,7 @@ export const StudentDirectory: React.FC = () => {
           {printData.map((data) => (
             <div key={data.student.id} className="page-break" style={{ display: 'block' }}>
               <div className="print-header">
-                <h1>GCM Convent School</h1>
+                <h1>{schoolName ?? PRODUCT_NAME}</h1>
                 <h2>Confidential Counseling Record</h2>
                 <div className="print-meta">
                   <span><strong>Student:</strong> {data.student.full_name}</span>

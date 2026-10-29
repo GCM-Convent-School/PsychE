@@ -9,7 +9,8 @@ import { StudentDirectory } from './pages/StudentDirectory';
 import { Settings } from './pages/Settings';
 import { KanbanBoard } from './pages/KanbanBoard';
 import { BulkSchedule } from './pages/BulkSchedule';
-import { PinScreen } from './components/PinScreen';
+import { AuthGate } from './components/AuthGate';
+import { AuthProvider } from './lib/auth';
 import { ReportExport } from './pages/ReportExport';
 import { FormalReportExport } from './pages/FormalReportExport';
 import { Analytics } from './pages/Analytics';
@@ -18,32 +19,34 @@ import { GlobalTagManager } from './components/GlobalTagManager';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={
-          <PinScreen>
-            <Layout />
-          </PinScreen>
-        }>
-          <Route index element={<Dashboard />} />
-          <Route path="student/:studentId" element={<StudentProfile />} />
-          <Route path="add-log" element={<AddLog />} />
-          <Route path="add-student" element={<AddStudent />} />
-          <Route path="edit-student/:id" element={<AddStudent />} />
-          <Route path="logs" element={<AllLogs />} />
-          <Route path="directory" element={<StudentDirectory />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="kanban" element={<KanbanBoard />} />
-          <Route path="bulk-schedule" element={<BulkSchedule />} />
-          <Route path="analytics" element={<Analytics />} />
-          {/* V3 Routes */}
-          <Route path="library" element={<LibraryManager />} />
-          <Route path="tags" element={<GlobalTagManager />} />
-        </Route>
-        <Route path="/report" element={<PinScreen><ReportExport /></PinScreen>} />
-        <Route path="/formal-report" element={<PinScreen><FormalReportExport /></PinScreen>} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={
+            <AuthGate>
+              <Layout />
+            </AuthGate>
+          }>
+            <Route index element={<Dashboard />} />
+            <Route path="student/:studentId" element={<StudentProfile />} />
+            <Route path="add-log" element={<AddLog />} />
+            <Route path="add-student" element={<AddStudent />} />
+            <Route path="edit-student/:id" element={<AddStudent />} />
+            <Route path="logs" element={<AllLogs />} />
+            <Route path="directory" element={<StudentDirectory />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="kanban" element={<KanbanBoard />} />
+            <Route path="bulk-schedule" element={<BulkSchedule />} />
+            <Route path="analytics" element={<Analytics />} />
+            {/* V3 Routes */}
+            <Route path="library" element={<LibraryManager />} />
+            <Route path="tags" element={<GlobalTagManager />} />
+          </Route>
+          <Route path="/report" element={<AuthGate><ReportExport /></AuthGate>} />
+          <Route path="/formal-report" element={<AuthGate><FormalReportExport /></AuthGate>} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

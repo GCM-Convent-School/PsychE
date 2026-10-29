@@ -22,6 +22,7 @@ import {
   AheadPanel, WatchlistPanel
 } from '../components/DashboardPanels';
 import type { ScheduleControls } from '../components/DashboardPanels';
+import { useDocumentTitle } from '../lib/branding';
 
 const container = {
   hidden: { opacity: 0 },
@@ -91,9 +92,7 @@ export const Dashboard: React.FC = () => {
   const [newDate, setNewDate] = useState('');
   const [importing, setImporting] = useState(false);
 
-  useEffect(() => {
-    document.title = "UPsych : GCM Edition | Dashboard";
-  }, []);
+  useDocumentTitle('Dashboard');
 
   useEffect(() => {
     fetchDashboardData();
@@ -484,7 +483,7 @@ export const Dashboard: React.FC = () => {
         student_id: 'STU-2026-101',
         full_name: 'John Doe',
         course: '10th Grade Section A',
-        email: 'john@student.gcm.edu',
+        email: 'john.doe@example.com',
         mobile: '+91 9876543210',
         fathers_name: 'Robert Doe',
         mothers_name: 'Jane Doe',
@@ -498,12 +497,12 @@ export const Dashboard: React.FC = () => {
       // Roll-only row: every session column may be left blank.
       {
         student_id: 'STU-2026-102',
-        full_name: 'Aagaz Dhiman',
+        full_name: 'Asha Verma',
         course: '9TH A',
-        email: 'aagaz102@gcmconventschool.com',
-        mobile: '+91 8427002262',
-        fathers_name: 'Pardeep S',
-        mothers_name: 'Mandeep K',
+        email: 'asha.verma@example.com',
+        mobile: '+91 9000000000',
+        fathers_name: 'Rakesh Verma',
+        mothers_name: 'Sunita Verma',
         enrolled_date: '',
         counselor_name: '',
         session_date: '',

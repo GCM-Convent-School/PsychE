@@ -27,6 +27,19 @@
         "dev:v2"
       ],
       "port": 5174
+    },
+    {
+      "name": "psyche-prod-check",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--mode",
+        "production",
+        "--port",
+        "5175",
+        "--strictPort"
+      ],
+      "port": 5175
     }
   ]
 }

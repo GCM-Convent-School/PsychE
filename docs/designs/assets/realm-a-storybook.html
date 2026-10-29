@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>UPsych Campus Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b1a2e; --cream:#fff6e6; --paper:#fffbf2;
+  --pink:#e8318a; --pinkd:#b8165f; --cobalt:#2346d1; --cobaltd:#1a35a6;
+  --mari:#f6b414; --orange:#f26b1d; --leaf:#2e9e4f; --leafd:#1c6e36;
+  --grass:#cfe9b4; --sand:#f8dca0;
+  --coral:#c2412d; --coralbg:#fde3dc;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1440px;background:var(--cream);color:var(--ink);font-family:Figtree,system-ui,sans-serif;font-size:14px;line-height:1.35}
+button{font-family:inherit;cursor:pointer}
+.serif{font-family:"Young Serif",Georgia,serif;font-weight:400}
+
+/* ---------- top bar ---------- */
+.top{height:64px;background:var(--ink);display:flex;align-items:flex-end;padding:0 32px;gap:20px;position:relative}
+.logo{display:flex;align-items:center;gap:10px;height:64px;color:#fff}
+.logo .mark{width:38px;height:38px}
+.logo b{font-family:"Young Serif",serif;font-size:24px;font-weight:400;letter-spacing:.2px}
+.logo b span{color:var(--mari)}
+.school{align-self:center;background:#2c2b44;border:1.5px solid #4b4a68;color:#fff;border-radius:999px;padding:6px 14px 6px 8px;font-weight:600;font-size:13px;display:flex;gap:8px;align-items:center}
+.school i{width:20px;height:20px;border-radius:50%;background:var(--mari);border:2px solid #fff;display:inline-block}
+.tabs{display:flex;gap:4px;margin-left:24px;align-items:flex-end}
+.tab{color:#e7e5f2;font-weight:600;font-size:14px;padding:12px 18px 16px}
+.tab.on{background:var(--cream);color:var(--ink);border-radius:14px 14px 0 0;position:relative;font-weight:800}
+.tab.on:before,.tab.on:after{content:"";position:absolute;bottom:0;width:14px;height:14px;background:radial-gradient(circle at 0 0,transparent 14px,var(--cream) 14.5px)}
+.tab.on:before{left:-14px;background:radial-gradient(circle at 0 0,transparent 13.5px,var(--cream) 14px)}
+.tab.on:after{right:-14px;background:radial-gradient(circle at 100% 0,transparent 13.5px,var(--cream) 14px)}
+.user{margin-left:auto;align-self:center;display:flex;gap:10px;align-items:center;color:#fff}
+.user .av{width:38px;height:38px;border-radius:50%;background:var(--pink);border:2.5px solid var(--mari);display:grid;place-items:center;font-weight:800;color:#fff}
+.user small{display:block;color:#cfcde0;font-size:12px}
+.user b{font-size:14px}
+
+/* ---------- hero ---------- */
+.hero{display:flex;gap:20px;padding:18px 32px 14px;align-items:stretch}
+.greet{flex:0 0 520px;display:flex;align-items:center;gap:14px}
+.greet .sun{width:104px;height:104px;flex:none}
+.ribbon{position:relative}
+.ribbon h1{font-family:"Young Serif",serif;font-weight:400;font-size:38px;line-height:1.05}
+.ribbon h1 em{font-style:normal;color:var(--pinkd)}
+.ribbon .term{display:inline-flex;margin-top:8px;align-items:center;gap:8px;background:var(--cobalt);color:#fff;font-weight:700;font-size:13px;padding:5px 14px;border:2.5px solid var(--ink);clip-path:polygon(0 0,100% 0,94% 50%,100% 100%,0 100%,6% 50%);padding-left:22px;padding-right:22px}
+.stats{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat{background:var(--paper);border:3px solid var(--ink);border-radius:12px;box-shadow:4px 4px 0 var(--ink);padding:12px 14px;position:relative;display:flex;gap:12px;align-items:center}
+.stat .big{font-family:"Young Serif",serif;font-size:36px;line-height:1}
+.stat .lbl{font-weight:700;font-size:14px}
+.stat .sub{font-size:12px;color:#4a4860;font-weight:600}
+.stat .stk{position:absolute;top:-12px;right:10px;background:var(--mari);border:2px solid var(--ink);border-radius:999px;font-size:12px;font-weight:800;padding:2px 9px;transform:rotate(4deg)}
+.stat .stk.g{background:#bff0c9}
+.stat svg{flex:none}
+
+/* ---------- main ---------- */
+.main{display:grid;grid-template-columns:920px 436px;gap:20px;padding:6px 32px 0}
+.left{display:flex;flex-direction:column;gap:18px}
+
+/* map */
+.map{position:relative;width:920px;height:616px;border:3px solid var(--ink);border-radius:18px;background:var(--grass);box-shadow:6px 6px 0 var(--ink);overflow:hidden}
+.map svg.land{position:absolute;inset:0}
+.maptitle{position:absolute;left:50%;top:-1px;transform:translateX(-50%);z-index:3}
+.maptitle span{display:block;background:var(--ink);color:#fff;font-family:"Young Serif",serif;font-size:15px;padding:5px 26px 7px;border-radius:0 0 14px 14px;letter-spacing:.3px}
+.plate{position:absolute;background:var(--paper);border:3px solid var(--ink);border-radius:12px;box-shadow:4px 4px 0 var(--ink);padding:9px 12px 11px;width:250px;z-index:2}
+.plate .tag{position:absolute;top:-13px;left:12px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.plate .row{display:flex;align-items:baseline;gap:8px;margin-top:2px}
+.plate .n{font-family:"Young Serif",serif;font-size:30px;line-height:1}
+.plate .nm{font-weight:800;font-size:16px}
+.plate p{font-size:13px;margin:4px 0 9px;color:#2f2d44;min-height:35px}
+.plate.low p{min-height:0}
+.btn{display:inline-flex;align-items:center;gap:6px;border:2.5px solid var(--ink);border-radius:999px;padding:6px 14px;font-weight:800;font-size:13px;background:var(--mari);color:var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.btn.cob{background:var(--cobalt);color:#fff}
+.btn.ink{background:var(--ink);color:#fff}
+.btn.pk{background:var(--pinkd);color:#fff}
+.btn.lf{background:var(--leafd);color:#fff}
+.btn.or{background:var(--orange);color:var(--ink)}
+.btn.ghost{background:#fff}
+
+.plate.hero1{width:304px;background:var(--pinkd);color:#fff;padding:10px 14px 11px}
+.plate.hero1 .tag{background:var(--mari);color:var(--ink);border:2px solid var(--ink)}
+.plate.hero1 .n{font-size:42px}
+.plate.hero1 .nm{font-size:20px}
+.plate.hero1 p{color:#fff;font-size:14px;min-height:0;margin:3px 0 8px}
+.plate.hero1 .btn{font-size:14px;padding:8px 18px}
+.plate.flag{background:var(--coralbg);border-color:var(--coral);box-shadow:4px 4px 0 var(--coral)}
+.plate.flag .tag{background:var(--coral)}
+.plate.flag .n,.plate.flag .nm{color:var(--coral)}
+.plate.flag p{color:#5a2418}
+.plate.win .tag{background:var(--leafd)}
+.start{position:absolute;z-index:3;transform:rotate(-6deg);background:var(--mari);border:2.5px solid var(--ink);font-weight:800;font-size:12px;letter-spacing:.8px;padding:3px 12px;border-radius:6px}
+
+/* patterns board */
+.board{position:relative;height:194px;border:3px solid var(--ink);border-radius:16px;background:#f3e3c3;box-shadow:6px 6px 0 var(--ink);padding:26px 18px 22px;
+ background-image:radial-gradient(#e2c896 1.4px,transparent 1.6px);background-size:14px 14px}
+.board .hd{position:absolute;top:-15px;left:22px;background:var(--cobalt);color:#fff;border:2.5px solid var(--ink);border-radius:8px;padding:3px 14px 5px;font-family:"Young Serif",serif;font-size:16px}
+.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;height:100%}
+.note{position:relative;background:var(--paper);border:2.5px solid var(--ink);padding:14px 14px 12px;display:flex;flex-direction:column;box-shadow:3px 3px 0 rgba(27,26,46,.85)}
+.note:nth-child(1){transform:rotate(-1deg)} .note:nth-child(3){transform:rotate(1deg)}
+.note .pin{position:absolute;top:-9px;left:50%;width:18px;height:18px;margin-left:-9px;border-radius:50%;border:2.5px solid var(--ink)}
+.note .k{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+.note p{font-size:13px;margin:4px 0 8px;flex:1;color:#2f2d44}
+.note .btn{align-self:flex-start;font-size:12.5px;padding:5px 12px}
+.note .badge{position:absolute;right:-12px;top:-14px}
+
+/* plan scroll */
+.scroll{position:relative;height:828px;padding:22px 10px}
+.rod{position:absolute;left:0;right:0;height:26px;background:var(--cobalt);border:3px solid var(--ink);border-radius:14px;z-index:2}
+.rod:before,.rod:after{content:"";position:absolute;top:-6px;width:30px;height:32px;border-radius:50%;background:var(--mari);border:3px solid var(--ink)}
+.rod:before{left:-10px}.rod:after{right:-10px}
+.rod.t{top:0}.rod.b{bottom:0}
+.parch{height:100%;background:var(--paper);border-left:3px solid var(--ink);border-right:3px solid var(--ink);padding:18px 18px 10px;
+ background-image:linear-gradient(90deg,transparent 12px,#f6d9e6 12px,#f6d9e6 14px,transparent 14px,transparent calc(100% - 14px),#f6d9e6 calc(100% - 14px),#f6d9e6 calc(100% - 12px),transparent calc(100% - 12px))}
+.ph{text-align:center;margin-bottom:8px}
+.ph h2{font-family:"Young Serif",serif;font-weight:400;font-size:24px}
+.ph small{display:block;font-size:12.5px;color:#4a4860;font-weight:600}
+.orn{display:block;margin:4px auto 0}
+.item{display:grid;grid-template-columns:36px 1fr;gap:10px;padding:15px 0 15px;border-top:2px dashed #d9c9a4}
+.item:first-of-type{border-top:0}
+.rk{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--ink);display:grid;place-items:center;font-family:"Young Serif",serif;font-size:17px;background:var(--mari)}
+.item h3{font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.item h3 em{font-style:normal}
+.item h3 span{font-weight:600;color:#4a4860}
+.item .d{font-size:13px;color:#2f2d44;margin:2px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:7px}
+.chips .w{font-size:11.5px;font-weight:800;color:#4a4860;letter-spacing:.4px;text-transform:uppercase}
+.chip{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;border:1.5px solid #c9bfa6;background:#fff}
+.chip.c{background:var(--coralbg);color:var(--coral);border-color:#e9a898}
+.chip.g{background:#dff3e2;color:var(--leafd);border-color:#9fd2ab}
+.item .btn{font-size:12.5px;padding:5px 13px}
+.item.calm{background:var(--coralbg);margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:10px;border-top:0}
+.item.calm .rk{background:#fff;border-color:var(--coral);color:var(--coral)}
+
+/* dock */
+.dockrow{display:flex;justify-content:center;padding:18px 32px 22px}
+.dock{display:flex;align-items:center;gap:8px;background:var(--ink);border-radius:999px;padding:9px 12px 9px 22px;box-shadow:5px 5px 0 var(--pink)}
+.dock .lab{color:#fff;font-family:"Young Serif",serif;font-size:16px;margin-right:10px}
+.db{display:flex;align-items:center;gap:9px;background:#2c2b44;border:none;color:#fff;border-radius:999px;padding:5px 18px 5px 5px;font-weight:700;font-size:14px}
+.db i{width:40px;height:40px;border-radius:50%;border:2.5px solid #fff;display:grid;place-items:center}
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<header class="top">
+  <div class="logo">
+    <svg class="mark" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#e8318a" stroke="#fff" stroke-width="2.5"/><path d="M12 14v8a8 8 0 0 0 16 0v-8" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="9" r="3" fill="#f6b414"/></svg>
+    <b>U<span>Psych</span></b>
+  </div>
+  <div class="school"><i></i>GCM Convent School</div>
+  <nav class="tabs">
+    <span class="tab on">Home</span><span class="tab">Students</span><span class="tab">Screening</span><span class="tab">Schedule</span><span class="tab">Reports</span>
+  </nav>
+  <div class="user"><div style="text-align:right"><b>Ms. Anita Sharma</b><small>Counsellor</small></div><div class="av">AS</div></div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="greet">
+    <svg class="sun" viewBox="0 0 110 110" aria-hidden="true">
+      <g stroke="#1b1a2e" stroke-width="2.5" stroke-linejoin="round">
+        <g fill="#f26b1d">
+          <path d="M55 2 L62 20 L48 20Z"/><path d="M55 108 L62 90 L48 90Z"/><path d="M2 55 L20 48 L20 62Z"/><path d="M108 55 L90 48 L90 62Z"/>
+          <path d="M17.5 17.5 L33 26 L26 33Z"/><path d="M92.5 92.5 L77 84 L84 77Z"/><path d="M92.5 17.5 L84 33 L77 26Z"/><path d="M17.5 92.5 L26 77 L33 84Z"/>
+        </g>
+        <circle cx="55" cy="55" r="33" fill="#f6b414"/>
+        <circle cx="55" cy="55" r="24" fill="#fff1b8"/>
+      </g>
+      <g fill="#e8318a"><circle cx="55" cy="25.5" r="3"/><circle cx="55" cy="84.5" r="3"/><circle cx="25.5" cy="55" r="3"/><circle cx="84.5" cy="55" r="3"/></g>
+      <g fill="none" stroke="#1b1a2e" stroke-width="2.5" stroke-linecap="round"><path d="M44 51 q4 -4 8 0"/><path d="M58 51 q4 -4 8 0"/><path d="M46 62 q9 8 18 0"/></g>
+      <circle cx="42" cy="60" r="3" fill="#f7a7c8"/><circle cx="68" cy="60" r="3" fill="#f7a7c8"/>
+    </svg>
+    <div class="ribbon">
+      <h1>Good morning, <em>Anita</em></h1>
+      <span class="term">Term 2 · Week 7</span>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="21" fill="none" stroke="#f3e3c3" stroke-width="8"/><circle cx="27" cy="27" r="21" fill="none" stroke="#2346d1" stroke-width="8" stroke-dasharray="85.8 132" transform="rotate(-90 27 27)"/><circle cx="27" cy="27" r="25" fill="none" stroke="#1b1a2e" stroke-width="2"/><circle cx="27" cy="27" r="17" fill="none" stroke="#1b1a2e" stroke-width="2"/></svg>
+      <div><div class="big">65%</div><div class="lbl">screened</div></div>
+      <span class="stk g">+18 this week</span>
+    </div>
+    <div class="stat">
+      <div><div class="big" style="color:var(--pinkd)">97</div><div class="lbl">never seen</div><div class="sub">start at the gate</div></div>
+    </div>
+    <div class="stat">
+      <svg width="44" height="44" viewBox="0 0 44 44"><path d="M22 3l5.6 11.4 12.6 1.8-9.1 8.9 2.1 12.5L22 31.7 10.8 37.6l2.1-12.5-9.1-8.9 12.6-1.8z" fill="#f6b414" stroke="#1b1a2e" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      <div><div class="big" style="color:var(--leafd)">8</div><div class="lbl">improved</div><div class="sub">this month</div></div>
+    </div>
+    <div class="stat">
+      <div><div class="big">412</div><div class="lbl">on roll</div><div class="sub">students</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MAIN ============ -->
+<main class="main">
+<div class="left">
+
+  <!-- campus map -->
+  <section class="map" aria-label="Student journey campus map">
+    <div class="maptitle"><span>The Student Journey · Campus Map</span></div>
+    <svg class="land" width="920" height="616" viewBox="0 0 920 616" aria-hidden="true">
+      <defs>
+        <pattern id="grassdots" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M5 12 l2 -5 l2 5" fill="none" stroke="#a9d58c" stroke-width="1.6"/></pattern>
+      </defs>
+      <rect width="920" height="616" fill="url(#grassdots)"/>
+      <!-- stream -->
+      <path d="M520 324 C 500 358 470 378 486 408 C 500 438 470 458 480 498 L 478 616" fill="none" stroke="#1b1a2e" stroke-width="34" stroke-linecap="round"/>
+      <path d="M520 324 C 500 358 470 378 486 408 C 500 438 470 458 480 498 L 478 616" fill="none" stroke="#5f85f0" stroke-width="28" stroke-linecap="round"/>
+      <path d="M512 340 q-8 8 -4 14 M482 388 q6 8 2 14 M490 520 q-6 8 -2 14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <ellipse cx="530" cy="320" rx="36" ry="16" fill="#5f85f0" stroke="#1b1a2e" stroke-width="3"/>
+      <!-- path -->
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path id="road" d="M-10 150 C 60 150 100 152 170 152 S 330 122 485 150 S 660 176 775 152 C 870 134 890 160 890 260 C 890 410 870 446 775 446 S 620 466 485 446 S 300 422 170 446 C 100 456 60 466 -10 466" stroke="#1b1a2e" stroke-width="40"/>
+        <use href="#road" stroke="#f8dca0" stroke-width="33"/>
+        <use href="#road" stroke="#fff" stroke-width="3" stroke-dasharray="10 12"/>
+      </g>
+      <!-- direction arrows -->
+      <g fill="#e8318a" stroke="#1b1a2e" stroke-width="2" stroke-linejoin="round">
+        <path d="M322 130 l14 7 -14 7z"/><path d="M630 158 l14 7 -14 7z"/><path d="M883 292 l7 14 7 -14z"/><path d="M640 458 l-14 7 14 7z"/><path d="M330 430 l-14 7 14 7z"/>
+      </g>
+      <!-- decorative bushes & flowers -->
+      <g stroke="#1b1a2e" stroke-width="2.5">
+        <circle cx="330" cy="72" r="16" fill="#2e9e4f"/><circle cx="350" cy="80" r="12" fill="#3fb562"/>
+        <circle cx="635" cy="70" r="14" fill="#2e9e4f"/><circle cx="618" cy="82" r="10" fill="#3fb562"/>
+        <circle cx="618" cy="590" r="12" fill="#2e9e4f"/>
+        <circle cx="640" cy="320" r="13" fill="#2e9e4f"/>
+      </g>
+      <g stroke="#1b1a2e" stroke-width="1.5">
+        <circle cx="300" cy="300" r="5" fill="#e8318a"/><circle cx="312" cy="306" r="5" fill="#f6b414"/><circle cx="296" cy="312" r="5" fill="#f26b1d"/>
+        <circle cx="610" cy="560" r="5" fill="#e8318a"/><circle cx="845" cy="40" r="5" fill="#f6b414"/><circle cx="858" cy="48" r="5" fill="#e8318a"/>
+        <circle cx="40" cy="40" r="5" fill="#e8318a"/><circle cx="52" cy="48" r="5" fill="#f6b414"/>
+      </g>
+      <!-- stars -->
+      <g fill="#f6b414" stroke="#1b1a2e" stroke-width="2" stroke-linejoin="round">
+        <path d="M110 40 l4 8 9 1 -7 6 2 9 -8 -5 -8 5 2 -9 -7 -6 9 -1z"/>
+        <path d="M800 40 l3 6 7 1 -5 5 1 7 -6 -4 -6 4 1 -7 -5 -5 7 -1z"/>
+        <path d="M420 300 l3 6 7 1 -5 5 1 7 -6 -4 -6 4 1 -7 -5 -5 7 -1z"/>
+      </g>
+
+      <!-- 1 GATE (cx 170, base 140) -->
+      <g transform="translate(110 30)">
+        <rect x="6" y="20" width="22" height="92" fill="#f6b414" stroke="#1b1a2e" stroke-width="3"/>
+        <rect x="92" y="20" width="22" height="92" fill="#f6b414" stroke="#1b1a2e" stroke-width="3"/>
+        <circle cx="17" cy="14" r="9" fill="#e8318a" stroke="#1b1a2e" stroke-width="3"/>
+        <circle cx="103" cy="14" r="9" fill="#e8318a" stroke="#1b1a2e" stroke-width="3"/>
+        <path d="M28 52 Q60 20 92 52" fill="none" stroke="#1b1a2e" stroke-width="3"/>
+        <g stroke="#2346d1" stroke-width="4"><line x1="38" y1="50" x2="38" y2="112"/><line x1="49" y1="42" x2="49" y2="112"/><line x1="60" y1="39" x2="60" y2="112"/><line x1="71" y1="42" x2="71" y2="112"/><line x1="82" y1="50" x2="82" y2="112"/></g>
+        <line x1="28" y1="80" x2="92" y2="80" stroke="#1b1a2e" stroke-width="3"/>
+        <path d="M14 28 H106 L100 38 L106 48 H14 L20 38Z" fill="#b8165f" stroke="#1b1a2e" stroke-width="3" stroke-linejoin="round" transform="translate(0 -6)"/>
+        <text x="60" y="38" text-anchor="middle" font-family="Figtree" font-weight="800" font-size="11" fill="#fff" letter-spacing="1.5">WELCOME</text>
+      </g>
+
+      <!-- 2 ASSEMBLY GROUND (cx 485) -->
+      <g transform="translate(415 34)">
+        <rect x="4" y="40" width="132" height="70" rx="10" fill="#f8b46a" stroke="#1b1a2e" stroke-width="3"/>
+        <rect x="16" y="50" width="108" height="50" rx="6" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="6 5"/>
+        <g fill="#2346d1" stroke="#1b1a2e" stroke-width="1.5">
+          <circle cx="36" cy="66" r="5"/><circle cx="52" cy="66" r="5"/><circle cx="68" cy="66" r="5"/><circle cx="84" cy="66" r="5"/>
+        </g>
+        <g fill="#e8318a" stroke="#1b1a2e" stroke-width="1.5">
+          <circle cx="36" cy="84" r="5"/><circle cx="52" cy="84" r="5"/><circle cx="68" cy="84" r="5"/><circle cx="84" cy="84" r="5"/>
+        </g>
+        <line x1="112" y1="94" x2="112" y2="4" stroke="#1b1a2e" stroke-width="4"/>
+        <path d="M114 6 H138 L132 15 L138 24 H114Z" fill="#2346d1" stroke="#1b1a2e" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="112" cy="4" r="4" fill="#f6b414" stroke="#1b1a2e" stroke-width="2"/>
+      </g>
+
+      <!-- 3 LIGHTHOUSE / BEACON (cx 775) -->
+      <g transform="translate(735 18)">
+        <path d="M10 22 L-14 10 M10 30 L-18 30 M70 22 L94 10 M70 30 L98 30" stroke="#f6b414" stroke-width="4" stroke-linecap="round"/>
+        <path d="M24 46 L56 46 L64 124 L16 124Z" fill="#fffbf2" stroke="#1b1a2e" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M22 66 L58 66 L60 84 L20 84Z M18 102 L62 102 L63 116 L17 116Z" fill="#c2412d" stroke="#1b1a2e" stroke-width="2.5" stroke-linejoin="round"/>
+        <rect x="22" y="38" width="36" height="9" fill="#1b1a2e"/>
+        <rect x="27" y="16" width="26" height="22" rx="3" fill="#f6b414" stroke="#1b1a2e" stroke-width="3"/>
+        <path d="M24 16 L40 2 L56 16Z" fill="#2346d1" stroke="#1b1a2e" stroke-width="3" stroke-linejoin="round"/>
+        <rect x="34" y="88" width="12" height="14" rx="6" fill="#2346d1" stroke="#1b1a2e" stroke-width="2"/>
+      </g>
+
+      <!-- 4 GREENHOUSE (cx 775, row 2) -->
+      <g transform="translate(712 330)">
+        <path d="M6 44 L63 8 L120 44 V100 H6Z" fill="#cfe0ff" stroke="#1b1a2e" stroke-width="3" stroke-linejoin="round"/>
+        <g stroke="#1b1a2e" stroke-width="2.5"><line x1="35" y1="26" x2="35" y2="100"/><line x1="63" y1="8" x2="63" y2="100"/><line x1="91" y1="26" x2="91" y2="100"/><line x1="6" y1="70" x2="120" y2="70"/></g>
+        <g stroke="#1b1a2e" stroke-width="2">
+          <path d="M18 100 q-4 -18 2 -22 q6 6 -2 22" fill="#2e9e4f"/><path d="M48 100 q-6 -22 4 -26 q6 8 -4 26" fill="#2e9e4f"/>
+          <path d="M76 100 q-4 -18 3 -22 q5 6 -3 22" fill="#2e9e4f"/><path d="M104 100 q-6 -20 4 -24 q5 8 -4 24" fill="#2e9e4f"/>
+          <circle cx="22" cy="76" r="5" fill="#e8318a"/><circle cx="53" cy="72" r="5" fill="#f6b414"/><circle cx="81" cy="76" r="5" fill="#e8318a"/><circle cx="108" cy="74" r="5" fill="#f26b1d"/>
+        </g>
+        <rect x="-4" y="98" width="134" height="10" rx="4" fill="#f26b1d" stroke="#1b1a2e" stroke-width="2.5"/>
+      </g>
+
+      <!-- 5 BRIDGE (over stream, cx ~485) -->
+      <g transform="translate(420 386)">
+        <path d="M0 52 Q65 6 130 52 L130 64 Q65 22 0 64Z" fill="#f26b1d" stroke="#1b1a2e" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M2 40 Q65 -4 128 40" fill="none" stroke="#1b1a2e" stroke-width="3"/>
+        <g stroke="#1b1a2e" stroke-width="3"><line x1="20" y1="30" x2="20" y2="46"/><line x1="44" y1="18" x2="44" y2="35"/><line x1="65" y1="14" x2="65" y2="31"/><line x1="86" y1="18" x2="86" y2="35"/><line x1="110" y1="30" x2="110" y2="46"/></g>
+        <circle cx="2" cy="40" r="5" fill="#f6b414" stroke="#1b1a2e" stroke-width="2.5"/><circle cx="128" cy="40" r="5" fill="#f6b414" stroke="#1b1a2e" stroke-width="2.5"/>
+      </g>
+
+      <!-- 6 TREE WITH BANNER (cx 170, row 2) -->
+      <g transform="translate(100 322)">
+        <rect x="62" y="70" width="16" height="44" fill="#9a5a2c" stroke="#1b1a2e" stroke-width="3"/>
+        <circle cx="70" cy="50" r="44" fill="#2e9e4f" stroke="#1b1a2e" stroke-width="3"/>
+        <circle cx="46" cy="38" r="6" fill="#e8318a" stroke="#1b1a2e" stroke-width="2"/><circle cx="92" cy="34" r="6" fill="#f6b414" stroke="#1b1a2e" stroke-width="2"/><circle cx="74" cy="22" r="6" fill="#f26b1d" stroke="#1b1a2e" stroke-width="2"/><circle cx="96" cy="62" r="6" fill="#e8318a" stroke="#1b1a2e" stroke-width="2"/>
+        <path d="M0 58 H140 L132 70 L140 82 H0 L8 70Z" fill="#f6b414" stroke="#1b1a2e" stroke-width="3" stroke-linejoin="round"/>
+        <text x="70" y="75" text-anchor="middle" font-family="Figtree" font-weight="800" font-size="11.5" fill="#1b1a2e" letter-spacing="1.2">40 HEADED HOME</text>
+        <g stroke="#1b1a2e" stroke-width="1.2"><rect x="-6" y="18" width="7" height="7" fill="#e8318a" transform="rotate(20 -2 22)"/><rect x="140" y="10" width="7" height="7" fill="#2346d1" transform="rotate(-15 143 13)"/><rect x="150" y="40" width="6" height="6" fill="#f6b414"/><circle cx="-10" cy="44" r="3.5" fill="#2346d1"/><circle cx="130" cy="0" r="3.5" fill="#e8318a"/></g>
+      </g>
+    </svg>
+
+    <!-- label plates -->
+    <span class="start" style="left:24px;top:112px">START HERE</span>
+    <div class="plate hero1" style="left:18px;top:170px">
+      <span class="tag">Stage 1 · The Gate</span>
+      <div class="row"><span class="n">97</span><span class="nm">Never seen</span></div>
+      <p>31 in Class 10-A. Teachers can nominate who they worry about.</p>
+      <button class="btn">Plan screening →</button>
+    </div>
+    <div class="plate" style="left:360px;top:182px">
+      <span class="tag">Stage 2 · Assembly ground</span>
+      <div class="row"><span class="n" style="color:var(--cobalt)">268</span><span class="nm">Screened</span></div>
+      <p>4 still need a baseline before scores count.</p>
+      <button class="btn cob">Finish 4 baselines</button>
+    </div>
+    <div class="plate flag" style="left:640px;top:182px">
+      <span class="tag">Stage 3 · Beacon</span>
+      <div class="row"><span class="n">31</span><span class="nm">Flagged</span></div>
+      <p>9 not contacted yet. 2 high priority.</p>
+      <button class="btn ink">Contact 2 today</button>
+    </div>
+    <div class="plate low" style="left:640px;top:476px">
+      <span class="tag">Stage 4 · Greenhouse</span>
+      <div class="row"><span class="n" style="color:var(--leafd)">22</span><span class="nm">In support</span></div>
+      <p>3 not engaging. Try a new format.</p>
+      <button class="btn lf">Review 3</button>
+    </div>
+    <div class="plate low" style="left:360px;top:482px">
+      <span class="tag">Stage 5 · Bridge</span>
+      <div class="row"><span class="n" style="color:#b34a0c">14</span><span class="nm">Follow-up</span></div>
+      <p>6 overdue, oldest 9 days.</p>
+      <button class="btn or">Rebook 6</button>
+    </div>
+    <div class="plate win low" style="left:40px;top:476px">
+      <span class="tag">Stage 6 · The Banner Tree</span>
+      <div class="row"><span class="n" style="color:var(--leafd)">40</span><span class="nm">Closed</span></div>
+      <p>Re-screen due for 12 next week.</p>
+      <button class="btn pk">Queue re-screens</button>
+    </div>
+  </section>
+
+  <!-- patterns board -->
+  <section class="board">
+    <span class="hd">Notices · patterns worth acting on</span>
+    <div class="notes">
+      <div class="note" style="border-top:8px solid var(--mari)">
+        <span class="pin" style="background:var(--mari)"></span>
+        <span class="k" style="color:#8a5a00">Class 12-B · Emotional</span>
+        <p>5 students flagged on Emotional, 2 weeks before pre-boards. One group session reaches all 5.</p>
+        <button class="btn cob">Plan "Exam calm" group session</button>
+      </div>
+      <div class="note" style="border-top:8px solid var(--pink)">
+        <span class="pin" style="background:var(--pink)"></span>
+        <span class="k" style="color:var(--pinkd)">Class 10-A · Coverage</span>
+        <p>31 of 40 never seen. Ask the class teacher for names, then screen in one period.</p>
+        <button class="btn pk">Request teacher nominations</button>
+      </div>
+      <div class="note" style="border-top:8px solid var(--leaf)">
+        <span class="pin" style="background:var(--leaf)"></span>
+        <svg class="badge" width="56" height="56" viewBox="0 0 56 56" aria-label="Milestone"><path d="M28 2l5 6 8-2 2 8 8 3-3 7 5 6-6 5 1 8-8 1-3 8-7-4-7 4-3-8-8-1 1-8-6-5 5-6-3-7 8-3 2-8 8 2z" fill="#f6b414" stroke="#1b1a2e" stroke-width="2.5" stroke-linejoin="round"/><text x="28" y="26" text-anchor="middle" font-family="Figtree" font-weight="800" font-size="12" fill="#1b1a2e">−11</text><text x="28" y="38" text-anchor="middle" font-family="Figtree" font-weight="800" font-size="8" fill="#1b1a2e">POINTS</text></svg>
+        <span class="k" style="color:var(--leafd)">Outcomes · school milestone</span>
+        <p>8 students improved after 3+ sessions. Average score down 11 points.</p>
+        <button class="btn lf">Share outcome report</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- plan scroll -->
+<aside class="scroll" aria-label="This week's plan">
+  <div class="rod t"></div><div class="rod b"></div>
+  <div class="parch">
+    <div class="ph">
+      <h2>This Week's Plan</h2>
+      <small>Ranked by what matters most · 5 steps</small>
+      <svg class="orn" width="160" height="12" viewBox="0 0 160 12"><path d="M0 6 H62 M98 6 H160" stroke="#1b1a2e" stroke-width="2"/><circle cx="80" cy="6" r="5" fill="#e8318a" stroke="#1b1a2e" stroke-width="2"/><circle cx="68" cy="6" r="3" fill="#f6b414" stroke="#1b1a2e" stroke-width="1.5"/><circle cx="92" cy="6" r="3" fill="#2346d1" stroke="#1b1a2e" stroke-width="1.5"/></svg>
+    </div>
+
+    <div class="item calm">
+      <div class="rk">1</div>
+      <div>
+        <h3><em>Drake S. <span>· 12-B</span></em><button class="btn ink">Start check-in</button></h3>
+        <div class="d">Same-day check-in, review safety plan.</div>
+        <div class="chips"><span class="w">Why</span><span class="chip c">High priority</span><span class="chip">Emotional low</span><span class="chip">6 days since contact</span></div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="rk" style="background:#ffd6e8">2</div>
+      <div>
+        <h3><em>Rubika L. <span>· 11 PCM</span></em><button class="btn cob">Book parent meeting</button></h3>
+        <div class="d">Parent meeting about home routine.</div>
+        <div class="chips"><span class="w">Why</span><span class="chip">Family-driven</span><span class="chip">Consent on file</span><span class="chip">Follow-up 9d late</span></div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="rk" style="background:#cfe0ff">3</div>
+      <div>
+        <h3><em>3 students in support</em><button class="btn cob">Review</button></h3>
+        <div class="d">Not engaging, switch to group or teacher-referred check-in.</div>
+        <div class="chips"><span class="w">Why</span><span class="chip">Low engagement</span><span class="chip">2 missed sessions</span></div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="rk">4</div>
+      <div>
+        <h3><em>4 pending baselines</em><button class="btn cob">Run baselines</button></h3>
+        <div class="d">2-minute baseline.</div>
+        <div class="chips"><span class="w">Why</span><span class="chip">No baseline</span><span class="chip">~8 min total</span></div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="rk" style="background:#bff0c9">5</div>
+      <div>
+        <h3><em>Michael S. <span>· 12-B</span></em><button class="btn cob">Plan closure</button></h3>
+        <div class="d">Score improved 34 → 22, plan a closing session.</div>
+        <div class="chips"><span class="w">Why</span><span class="chip g">Improving</span><span class="chip">Session 4 of plan</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+</main>
+
+<!-- dock -->
+<div class="dockrow">
+  <div class="dock">
+    <span class="lab">Log something</span>
+    <button class="db"><i style="background:var(--pink)"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg></i>Quick check-in</button>
+    <button class="db"><i style="background:var(--cobalt)"><svg width="20" height="20" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="13" rx="2" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M3 8h14M7 2v4M13 2v4" stroke="#fff" stroke-width="2.5"/></svg></i>Full session</button>
+    <button class="db"><i style="background:var(--mari)"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 16V9M10 16V4M16 16v-5" stroke="#1b1a2e" stroke-width="3" stroke-linecap="round"/></svg></i>Class screening</button>
+    <button class="db"><i style="background:var(--leaf)"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M3.5 17c1-4 12-4 13 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg></i>Teacher referral</button>
+  </div>
+</div>
+</body>
+</html>

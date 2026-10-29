@@ -21,8 +21,10 @@ import { PrintSessionCard } from '../components/print/PrintSessionCard';
 import { PrintTelemetryBlock } from '../components/print/PrintTelemetryBlock';
 import { PrintAISummaryBlock } from '../components/print/PrintAISummaryBlock';
 import type { FormalizedSession } from '../types';
+import { useBranding, appTitle } from '../lib/branding';
 
 export const FormalReportExport: React.FC = () => {
+  const { schoolName } = useBranding();
   const [searchParams] = useSearchParams();
   const studentId = searchParams.get('studentId');
   const startDate = searchParams.get('start');
@@ -122,7 +124,7 @@ export const FormalReportExport: React.FC = () => {
       <div style={{ maxWidth: '800px', margin: '0 auto', fontFamily: 'serif' }}>
         <div style={{ borderBottom: '2px solid #000', paddingBottom: '1rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>UPsych : GCM Edition Formal Timeline</h1>
+            <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>{appTitle(schoolName)} Formal Timeline</h1>
             <p style={{ margin: '0.5rem 0 0 0', fontSize: '1rem', color: '#555' }}>Counseling & Assessment Statement — Formal</p>
           </div>
           <div style={{ textAlign: 'right', fontSize: '0.875rem' }}>
@@ -187,7 +189,7 @@ export const FormalReportExport: React.FC = () => {
             Formal entries are AI-rewritten from redacted session text; raw entries (marked above) are shown verbatim.
             This supplements, and does not replace, the counsellor's own clinical judgement.
           </p>
-          <p style={{ margin: '0.25rem 0 0 0' }}>UPsych : GCM Edition • Confidential Record</p>
+          <p style={{ margin: '0.25rem 0 0 0' }}>{appTitle(schoolName)} • Confidential Record</p>
         </div>
       </div>
     </div>

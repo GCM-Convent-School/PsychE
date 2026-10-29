@@ -11,6 +11,7 @@ import { AssessmentWizard } from '../components/AssessmentWizard';
 import { NextTimeNote, NotePrompt } from '../components/MiniNotes';
 import { createNote, fetchOpenNotes, setNoteDone } from '../lib/studentNotes';
 import type { NoteKind, StudentNote } from '../types';
+import { useDocumentTitle } from '../lib/branding';
 
 const container = {
   hidden: { opacity: 0 },
@@ -87,9 +88,7 @@ export const AddLog: React.FC = () => {
     checkConflict();
   }, [studentUuid, scheduleId]);
 
-  useEffect(() => {
-    document.title = "UPsych : GCM Edition | Log Session";
-  }, []);
+  useDocumentTitle('Log Session');
 
   useEffect(() => {
     async function fetchInitialData() {

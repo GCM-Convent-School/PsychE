@@ -1,0 +1,175 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>UPsych direction v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* v3: playful + professional. Brand layer = flat folk illustration (YES NOW energy).
+     Work layer = flat colour blocks, 2px ink outlines, hard offset shadows. Pastels -> bold flats. */
+  :root{
+    --ink:#14121a; --paper:#fffaf0; --canvas:#f6f1e7; --muted:#5d5866;
+    --pink:#ff4fa3; --pink-2:#ffd1e6; --cobalt:#2747d6; --cobalt-2:#d6defd;
+    --marigold:#ffc43d; --marigold-2:#ffeab0; --orange:#ff7a2f; --orange-2:#ffdcc7;
+    --leaf:#22a06b; --leaf-2:#c9f0da; --lilac:#8f6cf0; --lilac-2:#e4dbff;
+    --risk:#c2412d; --risk-2:#fde3dc;
+    --sh:4px 4px 0 var(--ink); --sh-sm:3px 3px 0 var(--ink);
+  }
+  *{box-sizing:border-box} body{margin:0;background:#e8e0d0;font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+  .disp{font-family:"Bricolage Grotesque",Inter,sans-serif}
+  .device{margin:24px auto;width:1400px;background:var(--ink);border-radius:34px;padding-bottom:14px}
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:16px 28px 0;color:#fff;height:66px}
+  .logo{font:800 24px "Bricolage Grotesque";display:flex;gap:10px;align-items:center}
+  .logo .dot{width:22px;height:22px;border-radius:50%;background:var(--marigold);border:2px solid #fff}
+  .school{font:600 12px Inter;background:#2a2732;border-radius:999px;padding:6px 12px;color:#ddd}
+  .tabs{display:flex;gap:4px;align-items:flex-end;height:50px}
+  .tab{padding:10px 16px;font-size:14px;color:#b9b4c4;font-weight:500}
+  .tab.on{background:var(--canvas);color:var(--ink);font-weight:700;border-radius:14px 14px 0 0;padding:13px 22px 16px}
+  .me{display:flex;gap:10px;align-items:center;font-size:13px}
+  .ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;border:2px solid var(--ink)}
+  .canvas{background:var(--canvas);margin:0 14px;border-radius:28px;padding:22px 24px 96px;display:grid;grid-template-columns:1fr 360px;gap:22px;position:relative}
+  .box{background:var(--paper);border:2px solid var(--ink);border-radius:20px;box-shadow:var(--sh)}
+  /* Hero: illustrated banner */
+  .hero{position:relative;overflow:hidden;background:var(--pink);color:var(--ink);padding:22px 26px;height:232px;display:flex;justify-content:space-between}
+  .hero h1{font:800 40px/1 "Bricolage Grotesque";margin:6px 0 8px;letter-spacing:-.02em}
+  .hero p{margin:0;font-weight:600;max-width:440px}
+  .kicker{display:inline-block;font:700 12px Inter;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:4px 10px;transform:rotate(-3deg)}
+  .hero svg{position:absolute;right:0;bottom:0;height:220px}
+  .pills{display:flex;gap:12px;margin-top:14px;position:relative;z-index:1}
+  .pill{border:2px solid var(--ink);border-radius:16px;padding:8px 14px;background:var(--paper);box-shadow:var(--sh-sm)}
+  .pill b{font:800 24px "Bricolage Grotesque";display:block}
+  .pill span{font-size:11px;font-weight:700}
+  h2{font:800 20px "Bricolage Grotesque";margin:22px 0 12px;display:flex;justify-content:space-between;align-items:center}
+  .seg{display:flex;gap:6px;font:600 12px Inter}
+  .seg span{border:2px solid var(--ink);border-radius:999px;padding:4px 10px;background:var(--paper)} .seg .on{background:var(--ink);color:#fff}
+  /* Journey */
+  .journey{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+  .st{border:2px solid var(--ink);border-radius:18px;padding:12px;box-shadow:var(--sh-sm);position:relative;background:var(--paper)}
+  .st:not(:last-child)::after{content:"";position:absolute;right:-20px;top:40px;width:18px;border-top:3px dotted var(--ink)}
+  .st .k{font:700 11px Inter;text-transform:uppercase;letter-spacing:.04em}
+  .st .n{font:800 34px/1 "Bricolage Grotesque";margin:8px 0 6px}
+  .st .d{font-size:12px;color:var(--muted);min-height:46px}
+  .st .act{margin-top:10px;font:700 12px Inter;border:2px solid var(--ink);border-radius:12px;padding:7px;text-align:center;background:#fff}
+  .st.hot{background:var(--marigold);transform:rotate(-3deg) translateY(-6px);box-shadow:var(--sh)}
+  .st.hot .d{color:var(--ink)}
+  /* Patterns */
+  .patterns{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .pat{padding:14px;border-radius:18px}
+  .pat .tag{display:inline-block;font:700 11px Inter;border:2px solid var(--ink);border-radius:999px;padding:2px 8px;background:#fff}
+  .pat h4{font:800 16px/1.2 "Bricolage Grotesque";margin:10px 0 6px}
+  .pat p{font-size:12px;margin:0 0 10px;color:#2b2833}
+  .pat .act{font:700 12px Inter;background:var(--ink);color:#fff;border-radius:12px;padding:8px;text-align:center}
+  /* Plan rail */
+  .rail .head{background:var(--cobalt);color:#fff;border-radius:18px 18px 0 0;padding:16px 18px;border-bottom:2px solid var(--ink)}
+  .rail .head h3{font:800 22px "Bricolage Grotesque";margin:0}
+  .rail .head span{font-size:12px;opacity:.85}
+  .item{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:13px 16px;border-bottom:2px dashed #d8d1c3}
+  .num{width:28px;height:28px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font:800 13px Inter;background:var(--marigold)}
+  .item b{font-size:14px} .item .what{font-size:13px;margin:3px 0 6px}
+  .why{display:flex;flex-wrap:wrap;gap:4px}
+  .why span{font:600 10.5px Inter;border:1.5px solid var(--ink);border-radius:999px;padding:1px 7px;background:#fff}
+  .risk{color:var(--risk)!important;background:var(--risk-2)!important;border-color:var(--risk)!important}
+  .item .btns{display:flex;gap:6px;margin-top:8px}
+  .item .btns span{font:700 11px Inter;border:2px solid var(--ink);border-radius:10px;padding:4px 8px;background:#fff}
+  .item .btns .p{background:var(--ink);color:#fff}
+  .win{background:var(--leaf-2)}
+  /* Dock */
+  .dock{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);border-radius:999px;padding:7px;display:flex;gap:8px;border:2px solid var(--ink)}
+  .dock .b{height:44px;border-radius:999px;display:flex;align-items:center;gap:8px;padding:0 16px 0 7px;font:700 13px Inter;border:2px solid var(--ink)}
+  .dock .b i{width:30px;height:30px;border-radius:50%;background:#fff;display:grid;place-items:center;font-style:normal;border:2px solid var(--ink)}
+</style></head><body>
+<div class="device">
+  <div class="bar">
+    <div class="logo"><span class="dot"></span>UPsych <span class="school">GCM Convent School</span></div>
+    <div class="tabs"><span class="tab on">Home</span><span class="tab">Students</span><span class="tab">Screening</span><span class="tab">Schedule</span><span class="tab">Reports</span></div>
+    <div class="me"><div class="ava" style="background:var(--lilac-2)">AS</div><div>Ms. Anita Sharma<br><span style="color:#9a95a6;font-size:11px">Counsellor</span></div></div>
+  </div>
+  <div class="canvas">
+    <section>
+      <!-- BRAND LAYER: illustrated hero (flat folk style, ink outlines) -->
+      <div class="box hero">
+        <div style="position:relative;z-index:1">
+          <span class="kicker">Term 2 · Week 7</span>
+          <h1>Good morning, Anita</h1>
+          <p>3 things will move the needle most this week. Your plan is on the right.</p>
+          <div class="pills">
+            <div class="pill"><b>65%</b><span>screened (+18 this week)</span></div>
+            <div class="pill" style="background:var(--marigold)"><b>97</b><span>never seen</span></div>
+            <div class="pill" style="background:var(--leaf-2)"><b>8</b><span>improved this month</span></div>
+          </div>
+        </div>
+        <svg viewBox="0 0 520 190" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="#14121a" stroke-width="2.5" stroke-linejoin="round">
+            <circle cx="400" cy="70" r="46" fill="#ffc43d"/>
+            <g fill="#ffc43d">
+              <path d="M400 8 l8 14 h-16z"/><path d="M462 70 l-14 8 v-16z"/><path d="M338 70 l14 -8 v16z"/>
+              <path d="M444 26 l-4 15 -11 -11z"/><path d="M356 26 l15 4 -11 11z"/>
+            </g>
+            <path d="M372 72 q28 22 56 0" fill="none"/>
+            <circle cx="384" cy="60" r="4" fill="#14121a"/><circle cx="416" cy="60" r="4" fill="#14121a"/>
+            <path d="M210 190 v-70 l70 -46 70 46 v70z" fill="#fffaf0"/>
+            <path d="M200 124 l80 -56 80 56" fill="none" stroke-width="4"/>
+            <rect x="262" y="140" width="36" height="50" fill="#2747d6"/>
+            <rect x="228" y="130" width="22" height="22" fill="#d6defd"/><rect x="310" y="130" width="22" height="22" fill="#d6defd"/>
+            <circle cx="280" cy="104" r="10" fill="#ff7a2f"/>
+            <path d="M280 74 v-30" /><path d="M280 44 l24 8 -24 8z" fill="#22a06b"/>
+            <path d="M120 190 q20 -60 50 -40 q-10 -40 30 -36 q20 50 -10 76z" fill="#22a06b"/>
+            <path d="M440 190 q10 -50 40 -46 q20 20 0 46z" fill="#8f6cf0"/>
+            <path d="M160 40 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4z" fill="#fffaf0"/>
+            <path d="M488 140 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="#fffaf0"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- WORK LAYER: journey with next-best action per stage -->
+      <h2>Student journey <div class="seg"><span class="on">All</span><span>Class 9</span><span>10</span><span>11</span><span>12</span></div></h2>
+      <div class="journey">
+        <div class="st hot"><div class="k">Never seen</div><div class="n">97</div><div class="d">31 in Class 10-A. Teachers can nominate who they worry about.</div><div class="act">Plan screening</div></div>
+        <div class="st"><div class="k" style="color:var(--leaf)">Screened</div><div class="n">268</div><div class="d">4 still need a baseline before scores count.</div><div class="act">Finish 4 baselines</div></div>
+        <div class="st" style="background:var(--risk-2)"><div class="k" style="color:var(--risk)">Flagged</div><div class="n">31</div><div class="d">9 not contacted yet. 2 high priority.</div><div class="act">Contact 2 today</div></div>
+        <div class="st" style="background:var(--lilac-2)"><div class="k" style="color:var(--lilac)">In support</div><div class="n">22</div><div class="d">3 not engaging (low ETI). Try a new format.</div><div class="act">Review 3</div></div>
+        <div class="st" style="background:var(--cobalt-2)"><div class="k" style="color:var(--cobalt)">Follow-up</div><div class="n">14</div><div class="d">6 overdue, oldest 9 days.</div><div class="act">Rebook 6</div></div>
+        <div class="st" style="background:var(--leaf-2)"><div class="k" style="color:var(--leaf)">Closed</div><div class="n">40</div><div class="d">Re-screen due for 12 next week.</div><div class="act">Queue re-screens</div></div>
+      </div>
+
+      <!-- Class-level patterns -> group interventions -->
+      <h2>Patterns worth acting on <span style="font:600 12px Inter;color:var(--muted)">from screening + session data</span></h2>
+      <div class="patterns">
+        <div class="box pat" style="background:var(--orange-2)"><span class="tag">Class 12-B · Emotional</span>
+          <h4>5 students flagged on Emotional, 2 weeks before pre-boards</h4>
+          <p>One group session reaches all 5 and frees 4 individual slots.</p><div class="act">Plan "Exam calm" group session</div></div>
+        <div class="box pat" style="background:var(--marigold-2)"><span class="tag">Class 10-A · Coverage</span>
+          <h4>31 of 40 students never seen</h4>
+          <p>Ask the class teacher for names first, then screen the whole class in one period.</p><div class="act">Request teacher nominations</div></div>
+        <div class="box pat win"><span class="tag">Outcomes · this month</span>
+          <h4>8 students improved after 3+ sessions</h4>
+          <p>Average score down 11 points. Good evidence for the principal's review.</p><div class="act">Share outcome report</div></div>
+      </div>
+    </section>
+
+    <!-- This week's plan: ranked, each with WHY -->
+    <aside class="box rail" style="padding:0;align-self:start">
+      <div class="head"><h3>This week's plan</h3><span>Ranked by need and time since last contact</span></div>
+      <div class="item"><div class="num">1</div><div><b>Drake S. · 12-B</b><div class="what">Same-day check-in. Review safety plan.</div>
+        <div class="why"><span class="risk">High priority</span><span>Emotional low</span><span>6 days since contact</span></div>
+        <div class="btns"><span class="p">Start check-in</span><span>Protocol</span></div></div></div>
+      <div class="item"><div class="num">2</div><div><b>Rubika L. · 11 PCM</b><div class="what">Parent meeting about home routine.</div>
+        <div class="why"><span>Family-driven</span><span>Consent on file ✓</span><span>Follow-up 9d late</span></div>
+        <div class="btns"><span class="p">Book parent meeting</span><span>Snooze</span></div></div></div>
+      <div class="item"><div class="num">3</div><div><b>3 students in support</b><div class="what">Not engaging. Switch to a group or a teacher-referred check-in.</div>
+        <div class="why"><span>Low ETI</span><span>2 missed sessions</span></div>
+        <div class="btns"><span class="p">Review</span></div></div></div>
+      <div class="item"><div class="num">4</div><div><b>4 pending baselines</b><div class="what">2-minute baseline so their scores mean something.</div>
+        <div class="why"><span>No baseline</span><span>~8 min total</span></div>
+        <div class="btns"><span class="p">Run baselines</span></div></div></div>
+      <div class="item win" style="border-bottom:0;border-radius:0 0 18px 18px"><div class="num" style="background:#fff">5</div><div><b>Michael S. · 12-B 🌱</b><div class="what">Score improved 34 → 22. Plan a closing session.</div>
+        <div class="why"><span>Improving</span><span>Session 4 of plan</span></div>
+        <div class="btns"><span class="p">Plan closure</span></div></div></div>
+    </aside>
+
+    <div class="dock">
+      <span class="b" style="background:var(--leaf-2)"><i>⚡</i>Quick check-in</span>
+      <span class="b" style="background:var(--lilac-2)"><i>📝</i>Full session</span>
+      <span class="b" style="background:var(--marigold)"><i>🏫</i>Class screening</span>
+      <span class="b" style="background:var(--pink-2)"><i>🙋</i>Teacher referral</span>
+    </div>
+  </div>
+</div>
+</body></html>

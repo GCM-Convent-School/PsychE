@@ -16,7 +16,9 @@
 //  Shares GROQ_API_KEY / GEMINI_API_KEY with the other AI functions.
 // =============================================================================
 
+import { createClient } from 'npm:@supabase/supabase-js@2';
 import { buildCorsHeaders } from '../_shared/cors.ts';
+import { authorizeCaller, unauthorized } from '../_shared/auth.ts';
 import { fetchLiveCatalog } from '../_shared/modelCatalog.ts';
 import { DEFAULT_MODEL_PROFILES, readProviderKeys } from '../_shared/modelRouter.ts';
 
@@ -25,6 +27,11 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    // Release 1: only admins choose AI models (Settings page).
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const caller = await authorizeCaller(req, admin, { roles: ['admin'] });
+    if (!caller) return unauthorized(corsHeaders, { providers: null, defaults: [] });
+
     const keys = readProviderKeys();
     const catalog = await fetchLiveCatalog(keys.groq, keys.gemini);
     const defaults = DEFAULT_MODEL_PROFILES.map((m) => ({ provider: m.provider, name: m.name }));

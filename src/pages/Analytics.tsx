@@ -14,6 +14,7 @@ import {
   AllocationPanel, CoveragePanel, FeasibilityPanel,
   ThroughputPanel, TriagePanel, IntegrityPanel
 } from '../components/ProgrammeHealthPanel';
+import { useDocumentTitle } from '../lib/branding';
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
@@ -33,8 +34,9 @@ export const Analytics: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ProgrammeHealthPayload | null>(null);
 
+  useDocumentTitle('Programme Health');
+
   useEffect(() => {
-    document.title = 'UPsych : GCM Edition | Programme Health';
     (async () => {
       setLoading(true);
       const { data: payload, error: rpcError } = await supabase

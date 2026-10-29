@@ -34,6 +34,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { buildCorsHeaders } from '../_shared/cors.ts';
+import { authorizeCaller, unauthorized } from '../_shared/auth.ts';
 import { buildTelemetrySummary, renderTelemetrySummary } from '../_shared/telemetryLabels.ts';
 import { generateJsonWithRepair } from '../_shared/llmProviders.ts';
 import { generateWithFallback, readProviderKeys, availableProvidersFor, logModelUsage } from '../_shared/modelRouter.ts';
@@ -109,8 +110,18 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    // Release 1: staff session or the cron's service key; anon gets 401.
+    const caller = await authorizeCaller(req, supabase);
+    if (!caller) return unauthorized(corsHeaders, { report: null });
+
     const { studentUuid, source } = await req.json();
-    const generationSource: 'on_demand' | 'cron' = source === 'cron' ? 'cron' : 'on_demand';
+    // Only the cron may skip the on-demand cooldown.
+    const generationSource: 'on_demand' | 'cron' = source === 'cron' && caller.kind === 'service' ? 'cron' : 'on_demand';
 
     if (!studentUuid || typeof studentUuid !== 'string') {
       return new Response(JSON.stringify({ report: null, error: 'studentUuid is required.' }), {
@@ -118,11 +129,6 @@ Deno.serve(async (req: Request) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
 
     const [{ data: student, error: studentError }, { data: telemetry }, { data: engineStatusData }, { data: lastReport }] =
       await Promise.all([
@@ -247,6 +253,7 @@ Deno.serve(async (req: Request) => {
           report_jsonb: reportContent,
           generation_source: generationSource,
           model_used: modelUsed,
+          created_by: caller.kind === 'staff' ? caller.userId : null,
         },
       ])
       .select('id, student_uuid, report_jsonb, generation_source, model_used, generated_at')

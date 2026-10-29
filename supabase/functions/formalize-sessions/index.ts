@@ -26,6 +26,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { buildCorsHeaders } from '../_shared/cors.ts';
+import { authorizeCaller, unauthorized } from '../_shared/auth.ts';
 import { redactSessionForFormalization, type RawSession } from '../_shared/redaction.ts';
 import { generateJsonWithRepair } from '../_shared/llmProviders.ts';
 import { generateWithFallback, readProviderKeys, availableProvidersFor, logModelUsage } from '../_shared/modelRouter.ts';
@@ -80,6 +81,15 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    // Release 1: staff session or the service key; anon gets 401.
+    const caller = await authorizeCaller(req, supabase);
+    if (!caller) return unauthorized(corsHeaders, { formalizedSessions: [], skippedCount: 0 });
+
     const { studentUuid } = await req.json();
 
     if (!studentUuid || typeof studentUuid !== 'string') {
@@ -87,11 +97,6 @@ Deno.serve(async (req: Request) => {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
 
     const [{ data: logs, error: logsError }, { data: existing, error: existingError }] = await Promise.all([
       supabase.from('PsychE_Counseling_Logs')
@@ -177,6 +182,7 @@ Deno.serve(async (req: Request) => {
       recommended_action_formal: s.recommended_action,
       model_used: modelUsed,
       batch_id: batchId,
+      created_by: caller.kind === 'staff' ? caller.userId : null,
     }));
 
     const { data: inserted, error: upsertError } = await supabase

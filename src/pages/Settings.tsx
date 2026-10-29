@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Settings as SettingsIcon, BookOpen, Tag, Cpu } from 'lucide-react';
+import { ArrowLeft, Save, Settings as SettingsIcon, BookOpen, Tag, Cpu, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { getDailyCapacity } from '../lib/capacity';
 import { LibraryManager } from '../components/LibraryManager';
 import { GlobalTagManager } from '../components/GlobalTagManager';
 import { AIModelSettings } from '../components/AIModelSettings';
+import { StaffManager } from '../components/StaffManager';
+import { useAuth } from '../lib/auth';
+import { refreshBranding } from '../lib/branding';
 
 const SystemSettingsTab: React.FC = () => {
   const [capacity, setCapacity] = useState<number>(7);
-  const [allowedPins, setAllowedPins] = useState<string>('2001, 0987, 0999, 2580');
+  const [schoolName, setSchoolName] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
@@ -21,7 +26,8 @@ const SystemSettingsTab: React.FC = () => {
       const { data } = await supabase.from('PsychE_Settings').select('*').single();
       if (data) {
         setCapacity(data.daily_session_capacity || 7);
-        if (data.allowed_pins) setAllowedPins(data.allowed_pins);
+        setSchoolName(data.school_name ?? '');
+        setLogoUrl(data.school_logo_url ?? '');
       } else {
         const currentCapacity = await getDailyCapacity();
         setCapacity(currentCapacity);
@@ -45,10 +51,12 @@ const SystemSettingsTab: React.FC = () => {
         .upsert({ 
           id: 1, 
           daily_session_capacity: capacity,
-          allowed_pins: allowedPins
+          school_name: schoolName.trim() || null,
+          school_logo_url: logoUrl.trim() || null
         });
         
       if (error) throw error;
+      await refreshBranding();
       alert('Settings saved successfully!');
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -56,6 +64,21 @@ const SystemSettingsTab: React.FC = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Logos go to the public "branding" bucket (admins only, PNG/JPEG/WebP, 1 MB).
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    const path = `logo-${Date.now()}.${file.name.split('.').pop()?.toLowerCase() ?? 'png'}`;
+    const { error } = await supabase.storage.from('branding').upload(path, file, { upsert: false, contentType: file.type });
+    if (error) {
+      alert(`Logo upload failed: ${error.message}`);
+    } else {
+      setLogoUrl(supabase.storage.from('branding').getPublicUrl(path).data.publicUrl);
+    }
+    setUploadingLogo(false);
   };
 
   const handleAddCourse = async () => {
@@ -105,17 +128,27 @@ const SystemSettingsTab: React.FC = () => {
           <hr style={{ borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
 
           <div>
-            <label className="text-h3" style={{ fontSize: '1rem', display: 'block', marginBottom: '0.5rem' }}>Allowed Security PINs</label>
-            <p className="text-muted mb-4" style={{ fontSize: '0.875rem' }}>Comma-separated list of 4-digit PINs authorized to unlock the application.</p>
-            <input 
-              required
-              type="text" 
-              className="input" 
-              value={allowedPins}
-              onChange={(e) => setAllowedPins(e.target.value)}
-              placeholder="2001, 0987, 0999, 2580"
+            <label htmlFor="school-name" className="text-h3" style={{ fontSize: '1rem', display: 'block', marginBottom: '0.5rem' }}>School Name</label>
+            <p className="text-muted mb-4" style={{ fontSize: '0.875rem' }}>Shown on the sign-in screen, the top bar and every printed report.</p>
+            <input
+              id="school-name"
+              type="text"
+              className="input"
+              value={schoolName}
+              onChange={(e) => setSchoolName(e.target.value)}
+              placeholder="e.g. Springfield Public School"
               style={{ maxWidth: '400px' }}
             />
+          </div>
+
+          <div>
+            <label htmlFor="school-logo" className="text-h3" style={{ fontSize: '1rem', display: 'block', marginBottom: '0.5rem' }}>School Logo</label>
+            <p className="text-muted mb-4" style={{ fontSize: '0.875rem' }}>PNG, JPEG or WebP, up to 1 MB. Save Settings after uploading.</p>
+            <div className="flex items-center gap-4">
+              {logoUrl && <img src={logoUrl} alt="Current school logo" style={{ width: '56px', height: '56px', objectFit: 'contain', background: 'white', borderRadius: 'var(--radius-md)' }} />}
+              <input id="school-logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleLogoUpload} disabled={uploadingLogo} />
+              {uploadingLogo && <span className="text-muted">Uploading…</span>}
+            </div>
           </div>
 
           <hr style={{ borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
@@ -149,7 +182,7 @@ const SystemSettingsTab: React.FC = () => {
 
           <div>
             <label className="text-h3" style={{ fontSize: '1rem', display: 'block', marginBottom: '0.5rem' }}>App Version</label>
-            <p className="text-muted mb-4" style={{ fontSize: '0.875rem' }}>Current version of the UPsych : GCM Edition application.</p>
+            <p className="text-muted mb-4" style={{ fontSize: '0.875rem' }}>Current version of the UPsych application.</p>
             <div className="input" style={{ maxWidth: '200px', backgroundColor: 'var(--color-bg-alt)', opacity: 0.8, cursor: 'not-allowed' }}>
               Version: 4.0.0
             </div>
@@ -180,7 +213,9 @@ const container = {
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'system' | 'library' | 'tags' | 'ai'>('system');
+  const { staff } = useAuth();
+  const isAdmin = staff?.role === 'admin';
+  const [activeTab, setActiveTab] = useState<'system' | 'library' | 'tags' | 'ai' | 'staff'>(isAdmin ? 'system' : 'library');
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" style={{ padding: '1rem 0', maxWidth: '1000px', margin: '0 auto' }}>
@@ -205,11 +240,12 @@ export const Settings: React.FC = () => {
         paddingBottom: '0',
       }}>
         {([
-          { id: 'system',  label: 'System Settings',  Icon: SettingsIcon },
-          { id: 'library', label: 'Question Library',  Icon: BookOpen },
-          { id: 'tags',    label: 'Global Tags',       Icon: Tag },
-          { id: 'ai',      label: 'AI Models',         Icon: Cpu },
-        ] as const).map(({ id, label, Icon }) => (
+          { id: 'system',  label: 'System Settings',  Icon: SettingsIcon, adminOnly: true },
+          { id: 'staff',   label: 'Staff',             Icon: Users,        adminOnly: true },
+          { id: 'library', label: 'Question Library',  Icon: BookOpen,     adminOnly: false },
+          { id: 'tags',    label: 'Global Tags',       Icon: Tag,          adminOnly: false },
+          { id: 'ai',      label: 'AI Models',         Icon: Cpu,          adminOnly: true },
+        ] as const).filter(({ adminOnly }) => isAdmin || !adminOnly).map(({ id, label, Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
@@ -238,10 +274,11 @@ export const Settings: React.FC = () => {
         ))}
       </div>
 
-      {activeTab === 'system' && <SystemSettingsTab />}
+      {isAdmin && activeTab === 'system' && <SystemSettingsTab />}
+      {isAdmin && activeTab === 'staff' && <StaffManager />}
       {activeTab === 'library' && <LibraryManager />}
       {activeTab === 'tags' && <GlobalTagManager />}
-      {activeTab === 'ai' && <AIModelSettings />}
+      {isAdmin && activeTab === 'ai' && <AIModelSettings />}
 
     </motion.div>
   );

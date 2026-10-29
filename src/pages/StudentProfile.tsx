@@ -23,6 +23,7 @@ import {
 import type { TensionAxis } from '../components/TelemetryPanel';
 import type { EngineStatus } from '../analytics/ColdStart';
 import { calculateConfidenceMultiplier } from '../analytics/ColdStart';
+import { useDocumentTitle } from '../lib/branding';
 
 /** One prior telemetry snapshot, for trend + delta */
 interface TelemetryHistoryRow {
@@ -130,9 +131,7 @@ export const StudentProfile: React.FC = () => {
   const [endDate, setEndDate] = useState('');
   const [reportIncludeTelemetry, setReportIncludeTelemetry] = useState(false);
   const [reportIncludeSummary, setReportIncludeSummary] = useState(false);
-  useEffect(() => {
-    document.title = "UPsych : GCM Edition | Student Profile";
-  }, []);
+  useDocumentTitle('Student Profile');
 
   useEffect(() => {
     async function fetchStudentProfile() {

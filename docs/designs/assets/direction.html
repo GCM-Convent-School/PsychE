@@ -1,0 +1,154 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>UPsych direction: Student Journey Home</title>
+<style>
+  /* Direction mock, not final. Tokens: light canvas, black anchor, pastel = type. */
+  :root{
+    --canvas:#eef1f4; --surface:#ffffff; --ink:#111216; --ink-2:#5b5f6b; --line:#dfe3ea;
+    --mint:#d7f5e3; --mint-ink:#1f7a4d;
+    --lav:#e8defd; --lav-ink:#5b3fb5;
+    --butter:#fdf0c4; --butter-ink:#8a6a00;
+    --sky:#d9efff; --sky-ink:#1f5f99;
+    --coral:#ffe1da; --coral-ink:#b0442c;
+    --r-lg:28px; --r-md:20px; --r-sm:12px;
+  }
+  *{box-sizing:border-box} body{margin:0;background:#cfd6de;font-family:-apple-system,"SF Pro Rounded","Nunito",system-ui,sans-serif;color:var(--ink)}
+  .device{margin:28px auto;width:1380px;background:var(--ink);border-radius:36px;padding:0 0 14px;box-shadow:0 30px 60px rgba(17,18,22,.25)}
+  /* Top bar with notched active tab (from Dei) */
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px 0;color:#fff;height:70px}
+  .logo{font-weight:800;font-size:22px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+  .school{font-size:12px;font-weight:600;background:#25262c;border-radius:999px;padding:6px 12px;color:#cfd3dc}
+  .tabs{display:flex;gap:6px;align-items:flex-end;height:52px}
+  .tab{padding:10px 16px;font-size:14px;color:#aeb3bf;border-radius:14px 14px 0 0}
+  .tab.on{background:var(--canvas);color:var(--ink);font-weight:700;padding:14px 22px 16px}
+  .me{display:flex;align-items:center;gap:10px;font-size:13px}
+  .ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--ink)}
+  .canvas{background:var(--canvas);margin:0 14px;border-radius:0 0 28px 28px;border-top-left-radius:28px;border-top-right-radius:28px;padding:26px 28px 90px;position:relative;display:grid;grid-template-columns:1fr 330px;gap:24px;min-height:760px}
+  h1{font-size:34px;letter-spacing:-.03em;margin:0}
+  .sub{color:var(--ink-2);margin:6px 0 18px;font-size:14px}
+  .pills{display:flex;gap:10px;margin-bottom:22px}
+  .pill{border-radius:var(--r-md);padding:12px 18px;min-width:118px}
+  .pill b{display:block;font-size:30px;letter-spacing:-.03em} .pill span{font-size:12px;font-weight:600}
+  .pill.dash{border:2px dashed var(--butter-ink);background:var(--butter)}
+  /* Journey: stage cards linked with dotted connectors (SugarCRM + Dei path) */
+  .journey-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .journey-head h2{font-size:18px;margin:0}
+  .seg{display:flex;background:#fff;border-radius:999px;padding:4px;font-size:12px;font-weight:600}
+  .seg span{padding:6px 12px;border-radius:999px;color:var(--ink-2)} .seg .on{background:var(--ink);color:#fff}
+  .journey{display:grid;grid-template-columns:repeat(6,1fr);gap:22px;position:relative}
+  .stage{background:var(--surface);border-radius:var(--r-md);padding:14px;position:relative;min-height:230px;box-shadow:0 1px 0 var(--line)}
+  .stage:not(:last-child)::after{content:"";position:absolute;right:-22px;top:46px;width:22px;border-top:2px dotted #9aa3b2}
+  .stage .k{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:999px;padding:4px 10px}
+  .stage .n{font-size:34px;font-weight:800;letter-spacing:-.03em;margin:10px 0 2px}
+  .stage .d{font-size:12px;color:var(--ink-2);min-height:32px}
+  .stack{display:flex;margin:12px 0}
+  .stack .ava{width:28px;height:28px;font-size:10px;border:2px solid #fff;margin-left:-8px}
+  .stack .ava:first-child{margin-left:0}
+  .cta{display:block;text-align:center;font-size:12px;font-weight:700;border-radius:12px;padding:8px;background:var(--canvas)}
+  .stage.focus{background:var(--ink);color:#fff;transform:rotate(-2deg) translateY(-6px);box-shadow:0 18px 30px rgba(17,18,22,.25)}
+  .stage.focus .d{color:#c9ccd4} .stage.focus .cta{background:#fff;color:var(--ink)}
+  /* Class coverage row */
+  .classes{margin-top:22px;background:#fff;border-radius:var(--r-md);padding:16px 18px}
+  .classes h3{margin:0 0 10px;font-size:15px}
+  .crow{display:grid;grid-template-columns:110px 1fr 70px 120px;gap:12px;align-items:center;font-size:13px;padding:6px 0}
+  .track{height:10px;border-radius:999px;background:var(--canvas);overflow:hidden;display:flex}
+  .track i{display:block;height:10px}
+  /* Right rail: Today, colour by type (Dei "My Events") */
+  .rail h2{font-size:24px;margin:0 0 14px;letter-spacing:-.02em}
+  .ev{border-radius:var(--r-md);padding:14px;margin-bottom:12px}
+  .ev .t{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
+  .ev p{margin:8px 0 10px;font-size:13px;line-height:1.4}
+  .ev .go{background:#fff;border-radius:12px;padding:8px;text-align:center;font-size:12px;font-weight:700}
+  .float{position:absolute;right:-26px;bottom:120px;width:250px;transform:rotate(4deg);box-shadow:0 18px 30px rgba(17,18,22,.18)}
+  .risk{display:inline-block;font-size:11px;font-weight:700;color:var(--coral-ink);background:var(--coral);border-radius:999px;padding:2px 8px}
+  /* Dock = the split Log (fixes the observed confusion) */
+  .dock{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);border-radius:999px;padding:8px;display:flex;gap:8px;align-items:center}
+  .dock .b{height:44px;border-radius:999px;display:flex;align-items:center;gap:8px;padding:0 16px 0 8px;font-size:13px;font-weight:700}
+  .dock .b i{width:30px;height:30px;border-radius:50%;background:#fff;display:grid;place-items:center;font-style:normal}
+  .dock .sep{width:1px;height:26px;background:#3a3c44}
+  .dock .r{width:44px;height:44px;border-radius:50%;background:#25262c;color:#fff;display:grid;place-items:center}
+  .note{position:absolute;background:#fff7a8;border:1px solid #d8c400;font-size:11px;padding:4px 8px;border-radius:6px;max-width:220px;color:#333}
+</style></head><body>
+<div class="device">
+  <div class="bar">
+    <div class="logo">UPsych <span class="school">GCM Convent School</span></div>
+    <div class="tabs"><span class="tab on">Home</span><span class="tab">Students</span><span class="tab">Screening</span><span class="tab">Schedule</span><span class="tab">Reports</span></div>
+    <div class="me"><div class="ava" style="background:var(--lav)">AS</div><div>Ms. Anita Sharma<br><span style="color:#8d92a0;font-size:11px">Counsellor</span></div></div>
+  </div>
+  <div class="canvas">
+    <section>
+      <h1>Good morning, Anita 🌤️</h1>
+      <div class="sub">Term 2 · Week 7 · 412 students on roll</div>
+      <div class="pills">
+        <div class="pill" style="background:var(--sky)"><b>412</b><span style="color:var(--sky-ink)">On roll</span></div>
+        <div class="pill" style="background:var(--mint)"><b>65%</b><span style="color:var(--mint-ink)">Screened this term</span></div>
+        <div class="pill dash"><b>97</b><span style="color:var(--butter-ink)">Never seen</span></div>
+        <div class="pill" style="background:var(--lav)"><b>22</b><span style="color:var(--lav-ink)">In active support</span></div>
+      </div>
+
+      <div class="journey-head"><h2>Student journey</h2><div class="seg"><span class="on">All classes</span><span>Class 9</span><span>Class 10</span><span>Class 11</span><span>Class 12</span></div></div>
+      <div class="journey">
+        <div class="stage focus">
+          <span class="k" style="background:var(--butter);color:var(--butter-ink)">● Never seen</span>
+          <div class="n">97</div><div class="d">No screening or session yet. 31 are in Class 10-A.</div>
+          <div class="stack"><div class="ava" style="background:var(--butter)">RK</div><div class="ava" style="background:var(--sky)">PJ</div><div class="ava" style="background:var(--mint)">SA</div><div class="ava" style="background:#fff">+94</div></div>
+          <span class="cta">Plan class screening</span>
+        </div>
+        <div class="stage">
+          <span class="k" style="background:var(--mint);color:var(--mint-ink)">● Screened</span>
+          <div class="n">268</div><div class="d">Assessment scored. 237 within typical range.</div>
+          <div class="stack"><div class="ava" style="background:var(--mint)">NB</div><div class="ava" style="background:var(--lav)">AJ</div><div class="ava" style="background:#fff">+266</div></div>
+          <span class="cta">View results</span>
+        </div>
+        <div class="stage">
+          <span class="k" style="background:var(--coral);color:var(--coral-ink)">● Flagged</span>
+          <div class="n">31</div><div class="d">Scores above threshold. 9 not yet contacted.</div>
+          <div class="stack"><div class="ava" style="background:var(--coral)">DS</div><div class="ava" style="background:var(--coral)">RL</div><div class="ava" style="background:#fff">+29</div></div>
+          <span class="cta">Reach out to 9</span>
+        </div>
+        <div class="stage">
+          <span class="k" style="background:var(--lav);color:var(--lav-ink)">● In sessions</span>
+          <div class="n">22</div><div class="d">Active counselling plans.</div>
+          <div class="stack"><div class="ava" style="background:var(--lav)">MS</div><div class="ava" style="background:#fff">+21</div></div>
+          <span class="cta">Open caseload</span>
+        </div>
+        <div class="stage">
+          <span class="k" style="background:var(--sky);color:var(--sky-ink)">● Follow-up</span>
+          <div class="n">14</div><div class="d">6 overdue, oldest 9 days.</div>
+          <div class="stack"><div class="ava" style="background:var(--sky)">JD</div><div class="ava" style="background:#fff">+13</div></div>
+          <span class="cta">Reschedule 6</span>
+        </div>
+        <div class="stage">
+          <span class="k" style="background:#eceef2;color:var(--ink-2)">● Closed</span>
+          <div class="n">40</div><div class="d">Support completed this term.</div>
+          <div class="stack"><div class="ava" style="background:#eceef2">AK</div><div class="ava" style="background:#fff">+39</div></div>
+          <span class="cta">Outcomes</span>
+        </div>
+      </div>
+
+      <div class="classes"><h3>Coverage by class</h3>
+        <div class="crow"><b>Class 9-B</b><div class="track"><i style="width:82%;background:#7bd3a3"></i><i style="width:6%;background:#f2a493"></i></div><span>88%</span><span class="risk">2 flagged</span></div>
+        <div class="crow"><b>Class 10-A</b><div class="track"><i style="width:22%;background:#7bd3a3"></i><i style="width:3%;background:#f2a493"></i></div><span>25%</span><span style="font-size:12px;color:var(--butter-ink);font-weight:700">31 never seen</span></div>
+        <div class="crow"><b>Class 11 PCM</b><div class="track"><i style="width:64%;background:#7bd3a3"></i><i style="width:9%;background:#f2a493"></i></div><span>73%</span><span class="risk">5 flagged</span></div>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <h2>Today</h2>
+      <div class="ev" style="background:var(--mint)"><div class="t"><span>Screening</span><span>12:00</span></div><p>Class 10-A group screening, Wellbeing Check (12 questions). 31 students never seen.</p><div class="go">Start screening</div></div>
+      <div class="ev" style="background:var(--lav)"><div class="t"><span>Session</span><span>14:15</span></div><p>Drake S. · Class 12-B <span class="risk">High risk</span><br>Exam stress, week 3 of plan.</p><div class="go">Open student</div></div>
+      <div class="ev" style="background:var(--butter)"><div class="t"><span>Follow-up</span><span>9 days late</span></div><p>Rubika L. · Class 11 PCM. Check in on sleep and attendance.</p><div class="go">Reschedule</div></div>
+      <div class="ev float" style="background:var(--sky)"><div class="t"><span>4 free slots</span><span>today</span></div><p>Fill them with never-seen students from Class 10-A?</p><div class="go">Suggest 4 students</div></div>
+    </aside>
+
+    <div class="dock">
+      <span class="b" style="background:var(--mint)"><i>⚡</i>Quick check-in</span>
+      <span class="b" style="background:var(--lav)"><i>✎</i>Full session</span>
+      <span class="b" style="background:var(--butter)"><i>☰</i>Class screening</span>
+      <span class="sep"></span>
+      <span class="r">⌕</span><span class="r">＋</span>
+    </div>
+    <span class="note" style="left:500px;bottom:76px">Dock = "Log", split by intent. Quick check-in generates scores; Full session is the formal record.</span>
+    <span class="note" style="left:250px;top:226px">Never-seen is the first stage of the journey, lifted and tilted so it's impossible to miss.</span>
+  </div>
+</div>
+</body></html>

@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { toLocalDateStr } from '../lib/capacity';
 import { toTitleCase } from '../utils/stringFormatter';
 import { isValidStudentId, STUDENT_ID_PATTERN, STUDENT_ID_HINT, STUDENT_ID_PLACEHOLDER } from '../utils/studentId';
+import { useBranding, useDocumentTitle } from '../lib/branding';
 
 const container = {
   hidden: { opacity: 0 },
@@ -13,6 +14,7 @@ const container = {
 };
 
 export const AddStudent: React.FC = () => {
+  const { schoolName } = useBranding();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -30,8 +32,9 @@ export const AddStudent: React.FC = () => {
   const [enrolledDate, setEnrolledDate] = useState(toLocalDateStr(new Date()));
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
+  useDocumentTitle('Student Profile');
+
   useEffect(() => {
-    document.title = "UPsych : GCM Edition | Student Profile";
     const fetchCourses = async () => {
       try {
         const { data, error } = await supabase.from('PsychE_Courses').select('*').order('course_name');
@@ -160,7 +163,7 @@ export const AddStudent: React.FC = () => {
             {isEdit ? 'Edit Student Profile' : 'Add New Student'}
           </h1>
           <p className="text-gray-300">
-            {isEdit ? 'Update student details and profile picture.' : 'Register a new student in the GCM Convent School database.'}
+            {isEdit ? 'Update student details and profile picture.' : `Register a new student in ${schoolName ?? 'the school'}'s records.`}
           </p>
         </div>
       </div>
