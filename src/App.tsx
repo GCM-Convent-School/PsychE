@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
+import { Home } from './pages/Home';
 import { StudentProfile } from './pages/StudentProfile';
 import { AddLog } from './pages/AddLog';
 import { AddStudent } from './pages/AddStudent';
@@ -27,7 +28,8 @@ export default function App() {
               <Layout />
             </AuthGate>
           }>
-            <Route index element={<Dashboard />} />
+            <Route index element={<Home />} />
+            <Route path="day" element={<Dashboard />} />
             <Route path="student/:studentId" element={<StudentProfile />} />
             <Route path="add-log" element={<AddLog />} />
             <Route path="add-student" element={<AddStudent />} />

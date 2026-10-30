@@ -21,6 +21,7 @@ const ROLE_LABEL: Record<StaffRole, string> = {
   counsellor: 'Counsellor',
   principal: 'Principal (from Release 3)',
   admin: 'Admin',
+  teacher: 'Teacher (from Release 3)',
 };
 
 async function sendCode(staffId: string): Promise<string> {

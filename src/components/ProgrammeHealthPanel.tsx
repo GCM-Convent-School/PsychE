@@ -21,11 +21,11 @@ import {
 } from 'lucide-react';
 import type { StudentRollup, AllocationSummary, FeasibilityResult } from '../analytics/programmeHealth';
 
-const ACCENT = '#5b8af5';
-const NEUTRAL = 'rgba(255,255,255,0.25)';
-const GOOD = '#3fc98f';
-const WARN = '#f5a623';
-const BAD = '#f55b5b';
+const ACCENT = '#2F5BD3';
+const NEUTRAL = 'rgb(var(--ink) / 0.200)';
+const GOOD = '#157A52';
+const WARN = '#B25E09';
+const BAD = '#B42318';
 
 const label: React.CSSProperties = {
   fontSize: '0.6875rem', textTransform: 'uppercase', letterSpacing: '0.06em',
@@ -89,7 +89,7 @@ export const AllocationPanel: React.FC<{ a: AllocationSummary }> = ({ a }) => {
             <XAxis dataKey="pop" type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: 'var(--color-text-muted)' }}
               tickLine={false} axisLine={false} label={{ value: '% of students', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'var(--color-text-muted)' }} />
             <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: 'var(--color-text-muted)' }} tickLine={false} axisLine={false} />
-            <Tooltip contentStyle={{ backgroundColor: '#181b21', borderColor: 'rgba(255,255,255,0.15)', borderRadius: 8, fontSize: 12 }}
+            <Tooltip contentStyle={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'rgb(var(--ink) / 0.120)', borderRadius: 8, fontSize: 12 }}
               formatter={(v, n) => [`${Number(v).toFixed(1)}%`, n === 'actual' ? 'Actual share' : 'Perfect equality']}
               labelFormatter={(l) => `${l}% of students`} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -138,7 +138,7 @@ export const CoveragePanel: React.FC<{
               <span style={{ fontSize: '0.78rem' }}>{r.k}</span>
               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: r.tone }}>{r.v}</span>
             </div>
-            <div style={{ height: 7, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+            <div style={{ height: 7, borderRadius: 4, backgroundColor: 'rgb(var(--ink) / 0.056)', overflow: 'hidden' }}>
               <div style={{ width: `${(r.v / max) * 100}%`, height: '100%', borderRadius: 4, backgroundColor: ACCENT }} />
             </div>
           </div>
@@ -190,7 +190,7 @@ export const FeasibilityPanel: React.FC<{
               <span style={{ fontSize: '0.78rem' }}>{r.k}</span>
               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: tone(r.pct) }}>{r.pct.toFixed(0)}% of capacity</span>
             </div>
-            <div style={{ height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ height: 8, borderRadius: 4, backgroundColor: 'rgb(var(--ink) / 0.056)', overflow: 'hidden', position: 'relative' }}>
               <div style={{ width: `${Math.min(100, r.pct)}%`, height: '100%', borderRadius: 4, backgroundColor: tone(r.pct) }} />
               {r.pct > 100 && (
                 <div style={{ position: 'absolute', right: 4, top: -1, fontSize: '0.6rem', fontWeight: 800, color: '#fff' }}>
@@ -208,7 +208,7 @@ export const FeasibilityPanel: React.FC<{
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
         {frontier.map(f => (
           <div key={f.depth} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem',
-            padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)', backgroundColor: 'rgba(255,255,255,0.03)' }}>
+            padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)', backgroundColor: 'rgb(var(--ink) / 0.024)' }}>
             <span className="text-muted">{f.depth} sessions each for…</span>
             <strong>{f.students} students</strong>
           </div>
@@ -270,8 +270,8 @@ export const ThroughputPanel: React.FC<{
             <BarChart data={data} margin={{ top: 4, right: 6, bottom: 0, left: -22 }}>
               <XAxis dataKey="day" tick={{ fontSize: 9, fill: 'var(--color-text-muted)' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 9, fill: 'var(--color-text-muted)' }} tickLine={false} axisLine={false} />
-              <Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-                contentStyle={{ backgroundColor: '#181b21', borderColor: 'rgba(255,255,255,0.15)', borderRadius: 8, fontSize: 12 }}
+              <Tooltip cursor={{ fill: 'rgb(var(--ink) / 0.032)' }}
+                contentStyle={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'rgb(var(--ink) / 0.120)', borderRadius: 8, fontSize: 12 }}
                 formatter={(v) => [`${v} sessions`, 'Completed']} />
               <ReferenceLine y={capacity} stroke={NEUTRAL} strokeDasharray="4 4"
                 label={{ value: `capacity ${capacity}`, position: 'insideTopRight', fontSize: 9, fill: 'var(--color-text-muted)' }} />
@@ -305,7 +305,7 @@ export const TriagePanel: React.FC<{
     </p>
 
     <div style={{ padding: '0.6rem 0.8rem', borderRadius: 'var(--radius-md)', marginBottom: '0.875rem',
-      backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--color-border)', fontSize: '0.75rem' }}>
+      backgroundColor: 'rgb(var(--ink) / 0.024)', border: '1px solid var(--color-border)', fontSize: '0.75rem' }}>
       <strong>Need–service alignment: </strong>
       {alignment.rho == null
         ? <span className="text-muted">
@@ -332,7 +332,7 @@ export const TriagePanel: React.FC<{
           <button key={s.student_uuid} onClick={() => onOpen(s.student_id)}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem',
               padding: '0.5rem 0.7rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', textAlign: 'left',
-              background: 'rgba(255,255,255,0.03)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}>
+              background: 'rgb(var(--ink) / 0.024)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, flex: 1 }}>
               {s.full_name ?? s.student_id}
               <span className="text-muted" style={{ fontWeight: 400 }}> · {s.course ?? '—'}</span>
@@ -379,7 +379,7 @@ export const IntegrityPanel: React.FC<{ i: ProgrammeIntegrity }> = ({ i }) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
         {items.map(it => (
           <div key={it.k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem',
-            padding: '0.55rem 0.7rem', borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,0.03)' }}>
+            padding: '0.55rem 0.7rem', borderRadius: 'var(--radius-sm)', background: 'rgb(var(--ink) / 0.024)' }}>
             <span style={{ fontSize: '0.78rem' }}>
               {it.k}
               <span className="text-muted" style={{ display: 'block', fontSize: '0.68rem', marginTop: 2 }}>{it.note}</span>

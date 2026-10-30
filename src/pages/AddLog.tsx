@@ -394,7 +394,7 @@ export const AddLog: React.FC = () => {
       
       <div className="flex justify-between items-center mobile-stack mobile-stack-start" style={{ gap: '1rem' }}>
         <div>
-          <button onClick={() => navigate(-1)} className="btn btn-secondary mb-2" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button onClick={() => navigate(-1)} aria-label="Back" className="btn btn-secondary mb-2 page-back" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <ArrowLeft size={16} /> Back to Dashboard
           </button>
           <h1 className="text-h1 flex items-center gap-2">{scheduleId ? 'Complete Scheduled Session' : 'Log a Counseling Session'}</h1>
@@ -409,7 +409,7 @@ export const AddLog: React.FC = () => {
             initial={{ opacity: 0, y: -10 }} 
             animate={{ opacity: 1, y: 0 }}
             className="flex items-start gap-3 p-4" 
-            style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: 'var(--radius-md)', color: '#f59e0b' }}
+            style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: 'var(--radius-md)', color: 'var(--accent-amber)' }}
           >
             <AlertTriangle size={24} style={{ flexShrink: 0 }} />
             <div>
@@ -536,7 +536,7 @@ export const AddLog: React.FC = () => {
                             borderRadius: '20px',
                             backgroundColor: isCompleted ? 'rgba(16, 185, 129, 0.1)' : 'var(--color-surface)',
                             border: `1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'var(--color-border)'}`,
-                            color: isCompleted ? '#10b981' : 'inherit',
+                            color: isCompleted ? 'var(--accent-green)' : 'inherit',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
@@ -627,7 +627,7 @@ export const AddLog: React.FC = () => {
                       display: 'flex', alignItems: 'center', gap: '0.3rem',
                       fontSize: '0.8125rem', fontWeight: isSunday(followUpDate) ? 700 : 400,
                       marginTop: '0.4rem',
-                      color: isSunday(followUpDate) ? '#f87171' : 'var(--color-text-muted)'
+                      color: isSunday(followUpDate) ? 'var(--accent-red)' : 'var(--color-text-muted)'
                     }}>
                       {isSunday(followUpDate) && <AlertTriangle size={13} />}
                       {getWeekdayName(followUpDate)}
@@ -655,7 +655,7 @@ export const AddLog: React.FC = () => {
                           padding: '0.75rem',
                           borderRadius: 'var(--radius-md)',
                           border: `1px solid ${isSelected ? 'var(--color-primary)' : isFull ? 'rgba(239, 68, 68, 0.3)' : day.isSundayCol ? 'rgba(245,158,11,0.3)' : 'var(--color-border)'}`,
-                          backgroundColor: isSelected ? 'rgba(94, 106, 210, 0.2)' : isFull ? 'rgba(239, 68, 68, 0.05)' : day.isSundayCol ? 'rgba(245,158,11,0.06)' : 'rgba(24, 27, 33, 0.5)',
+                          backgroundColor: isSelected ? 'rgba(94, 106, 210, 0.2)' : isFull ? 'rgba(239, 68, 68, 0.05)' : day.isSundayCol ? 'rgba(245,158,11,0.06)' : 'var(--bg-tertiary)',
                           cursor: 'pointer',
                           display: 'flex',
                           flexDirection: 'column',
@@ -663,7 +663,7 @@ export const AddLog: React.FC = () => {
                           textAlign: 'center'
                         }}
                       >
-                        <span style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 400, color: isFull && !isSelected ? 'var(--color-danger)' : day.isSundayCol && !isSelected ? '#f59e0b' : 'inherit' }}>{day.label}</span>
+                        <span style={{ fontSize: '0.875rem', fontWeight: isSelected ? 600 : 400, color: isFull && !isSelected ? 'var(--color-danger)' : day.isSundayCol && !isSelected ? 'var(--accent-amber)' : 'inherit' }}>{day.label}</span>
                         <span style={{ fontSize: '0.75rem', color: isFull && !isSelected ? 'var(--color-danger)' : 'var(--color-text-muted)', marginTop: '4px' }}>{day.capacity.booked}/{day.capacity.total}</span>
                       </div>
                     );
@@ -697,7 +697,7 @@ export const AddLog: React.FC = () => {
             whileTap={{ scale: 0.95 }}
             className="btn btn-primary"
             style={{ 
-              background: 'linear-gradient(135deg, var(--color-primary), #8b5cf6)', 
+              background: 'var(--color-primary)', 
               border: 'none', 
               padding: '1rem 3rem',
               fontSize: '1.1rem',

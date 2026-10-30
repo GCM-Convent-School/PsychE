@@ -155,7 +155,7 @@ export const AddStudent: React.FC = () => {
       
       <div className="flex justify-between items-center mb-6 mobile-stack mobile-stack-start" style={{ padding: '0 2rem', gap: '1rem' }}>
         <div>
-          <button onClick={() => navigate(-1)} className="btn btn-secondary mb-4" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button onClick={() => navigate(-1)} aria-label="Back" className="btn btn-secondary mb-4 page-back" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <ArrowLeft size={16} /> Back to Dashboard
           </button>
           <h1 className="text-h1 flex items-center gap-2">
@@ -172,11 +172,11 @@ export const AddStudent: React.FC = () => {
         <form onSubmit={handleSubmit} className="flex" style={{ flexDirection: 'column', gap: '1.5rem' }}>
           
           <div className="flex justify-center mb-2 flex-col items-center gap-2">
-            <div className="hover:bg-gray-800 transition-colors cursor-pointer" style={{ position: 'relative', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed rgba(255,255,255,0.2)', transition: 'all 0.2s ease' }}>
+            <div className="hover:bg-gray-800 transition-colors cursor-pointer" style={{ position: 'relative', width: '100px', height: '100px', borderRadius: '50%', background: 'rgb(var(--ink) / 0.040)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed rgb(var(--ink) / 0.160)', transition: 'all 0.2s ease' }}>
               {profileImage ? (
                 <img src={profileImage} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <Camera size={32} color="rgba(255,255,255,0.3)" />
+                <Camera size={32} color="rgb(var(--ink) / 0.240)" />
               )}
               <input 
                 type="file" 
@@ -318,7 +318,7 @@ export const AddStudent: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn btn-primary w-full"
-              style={{ background: 'linear-gradient(135deg, var(--color-primary), #8b5cf6)', border: 'none', padding: '0.75rem 2rem', width: '100%', display: 'flex', justifyContent: 'center' }}
+              style={{ background: 'var(--color-primary)', border: 'none', padding: '0.75rem 2rem', width: '100%', display: 'flex', justifyContent: 'center' }}
             >
               {loading ? 'Saving...' : <><Save size={18} /> {isEdit ? 'Save Changes' : 'Add Student'}</>}
             </motion.button>

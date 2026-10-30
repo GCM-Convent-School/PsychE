@@ -27,10 +27,10 @@ import type {
   DatedRow, ScheduledRow, FollowUpRow, DayLoad, Momentum, FocusState
 } from '../analytics/operationalDay';
 
-const ACCENT = '#5b8af5';
-const GOOD = '#3fc98f';
-const WARN = '#f5a623';
-const BAD = '#f55b5b';
+const ACCENT = '#2F5BD3';
+const GOOD = '#157A52';
+const WARN = '#B25E09';
+const BAD = '#B42318';
 
 /**
  * Mount variant for every panel. Left un-driven on purpose: framer-motion
@@ -103,8 +103,8 @@ const RowShell: React.FC<{
   children: React.ReactNode;
   flat?: boolean;
 }> = ({ onClick, tone, children, flat }) => {
-  const base = tone ? `${tone}0d` : 'rgba(255,255,255,0.02)';
-  const hover = tone ? `${tone}1a` : 'rgba(255,255,255,0.05)';
+  const base = tone ? `${tone}0d` : 'rgb(var(--ink) / 0.016)';
+  const hover = tone ? `${tone}1a` : 'rgb(var(--ink) / 0.040)';
   return (
     <div
       onClick={onClick}
@@ -114,7 +114,7 @@ const RowShell: React.FC<{
         padding: '0.75rem 0.875rem',
         borderRadius: flat ? '0' : 'var(--radius-md)',
         backgroundColor: base,
-        border: `1px solid ${tone ? `${tone}33` : 'rgba(255,255,255,0.06)'}`,
+        border: `1px solid ${tone ? `${tone}33` : 'rgb(var(--ink) / 0.048)'}`,
         cursor: onClick ? 'pointer' : 'default',
         transition: 'background-color 0.15s ease',
         minWidth: 0
@@ -179,7 +179,7 @@ const IconAction: React.FC<{
     }}
     onMouseEnter={e => {
       e.currentTarget.style.color = danger ? BAD : 'var(--color-text)';
-      e.currentTarget.style.backgroundColor = danger ? 'rgba(245,91,91,0.08)' : 'rgba(255,255,255,0.06)';
+      e.currentTarget.style.backgroundColor = danger ? 'rgba(245,91,91,0.08)' : 'rgb(var(--ink) / 0.048)';
     }}
     onMouseLeave={e => {
       e.currentTarget.style.color = 'var(--color-text-muted)';
@@ -194,8 +194,8 @@ const IconAction: React.FC<{
 const RescheduleRow: React.FC<{ id: string; c: ScheduleControls }> = ({ id, c }) => (
   <div style={{
     display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.5rem 0.875rem',
-    backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '0 0 var(--radius-md) var(--radius-md)',
-    border: '1px solid rgba(255,255,255,0.06)', borderTop: 'none', marginTop: '-4px'
+    backgroundColor: 'rgb(var(--ink) / 0.024)', borderRadius: '0 0 var(--radius-md) var(--radius-md)',
+    border: '1px solid rgb(var(--ink) / 0.048)', borderTop: 'none', marginTop: '-4px'
   }}>
     <input
       type="date"
@@ -232,7 +232,7 @@ const SlotMeter: React.FC<{ load: DayLoad }> = ({ load }) => {
     const pct = Math.min(100, load.utilisationPct);
     return (
       <div>
-        <div style={{ height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+        <div style={{ height: 10, borderRadius: 5, backgroundColor: 'rgb(var(--ink) / 0.064)', overflow: 'hidden' }}>
           <div style={{
             width: `${pct}%`, height: '100%',
             background: `linear-gradient(90deg, ${GOOD}, ${ACCENT})`
@@ -249,7 +249,7 @@ const SlotMeter: React.FC<{ load: DayLoad }> = ({ load }) => {
         const isBooked = !isCompleted && i < load.total;
         const isOver = i >= load.capacity;
         const bg = isCompleted ? GOOD : isBooked ? (isOver ? WARN : ACCENT) : 'transparent';
-        const border = isCompleted ? GOOD : isBooked ? (isOver ? WARN : ACCENT) : 'rgba(255,255,255,0.18)';
+        const border = isCompleted ? GOOD : isBooked ? (isOver ? WARN : ACCENT) : 'rgb(var(--ink) / 0.144)';
         return (
           <span key={i} style={{
             width: 16, height: 10, borderRadius: 3,
@@ -304,7 +304,7 @@ export const FocusHero: React.FC<{
 
         <div className="dash-hero-actions no-print" style={{ display: 'flex', gap: '0.6rem', flexShrink: 0, flexWrap: 'wrap' }}>
           <button onClick={onPrimary} className="btn btn-primary" style={{
-            background: `linear-gradient(135deg, ${ACCENT}, #8b5cf6)`, border: 'none',
+            background: 'var(--color-primary)', border: 'none',
             padding: '0.7rem 1.25rem', fontSize: '0.9375rem', fontWeight: 600
           }}>
             <CalendarCheck size={18} /> Log a session
@@ -337,7 +337,7 @@ export const FocusHero: React.FC<{
         <div style={{ display: 'flex', gap: '1.1rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
           <LegendKey colour={GOOD} text={`${load.completed} completed`} />
           <LegendKey colour={ACCENT} text={`${load.booked} still to see`} />
-          <LegendKey colour="rgba(255,255,255,0.18)" text={`${load.freeSlots} free`} hollow />
+          <LegendKey colour="rgb(var(--ink) / 0.144)" text={`${load.freeSlots} free`} hollow />
         </div>
       </div>
     </motion.div>
@@ -561,7 +561,7 @@ const NeedBar: React.FC<{ score: number }> = ({ score }) => {
   const tone = pct >= 70 ? BAD : pct >= 45 ? WARN : ACCENT;
   return (
     <div className="dash-needbar" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 116, flexShrink: 0 }}>
-      <div style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+      <div style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: 'rgb(var(--ink) / 0.064)', overflow: 'hidden' }}>
         <div style={{ width: `${pct}%`, height: '100%', backgroundColor: tone }} />
       </div>
       <span style={{
@@ -692,12 +692,12 @@ export const MomentumPanel: React.FC<{
           <BarChart data={m.series} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
             <XAxis dataKey="label" hide />
             <Tooltip
-              contentStyle={{ backgroundColor: '#181b21', borderColor: 'rgba(255,255,255,0.15)', borderRadius: 8, fontSize: 12 }}
+              contentStyle={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'rgb(var(--ink) / 0.120)', borderRadius: 8, fontSize: 12 }}
               formatter={(v: unknown) => [`${v} completed`, '']}
               labelFormatter={(l: unknown) => String(l)}
             />
             {capacityKnown && capacity > 0 && (
-              <ReferenceLine y={capacity} stroke="rgba(255,255,255,0.25)" strokeDasharray="4 3" />
+              <ReferenceLine y={capacity} stroke="rgb(var(--ink) / 0.200)" strokeDasharray="4 3" />
             )}
             {/* minPointSize keeps an idle day visible as a faint stub. A
                 zero-height bar is indistinguishable from a missing day, which
@@ -736,7 +736,7 @@ const MiniStat: React.FC<{ k: string; v: React.ReactNode; onClick?: () => void }
       border: '1px solid var(--color-border)', cursor: onClick ? 'pointer' : 'default',
       transition: 'background-color 0.15s, border-color 0.15s'
     }}
-    onMouseEnter={e => { if (onClick) { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'var(--border-active)'; } }}
+    onMouseEnter={e => { if (onClick) { e.currentTarget.style.backgroundColor = 'rgb(var(--ink) / 0.032)'; e.currentTarget.style.borderColor = 'var(--border-active)'; } }}
     onMouseLeave={e => { if (onClick) { e.currentTarget.style.backgroundColor = 'var(--color-bg)'; e.currentTarget.style.borderColor = 'var(--color-border)'; } }}
   >
     <p style={{ ...label, marginBottom: '0.25rem' }}>{k}</p>

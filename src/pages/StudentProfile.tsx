@@ -24,6 +24,8 @@ import type { TensionAxis } from '../components/TelemetryPanel';
 import type { EngineStatus } from '../analytics/ColdStart';
 import { calculateConfidenceMultiplier } from '../analytics/ColdStart';
 import { useDocumentTitle } from '../lib/branding';
+import { JourneyStrip } from '../components/JourneyStrip';
+import { Avatar } from '../components/Avatar';
 
 /** One prior telemetry snapshot, for trend + delta */
 interface TelemetryHistoryRow {
@@ -527,22 +529,22 @@ export const StudentProfile: React.FC = () => {
       {/* Header Actions */}
       <motion.div variants={item} className="flex justify-between items-center mb-6 no-print mobile-stack mobile-stack-start" style={{ gap: '1rem' }}>
         <div>
-          <button onClick={() => navigate(-1)} className="btn btn-secondary mb-4" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none' }}>
+          <button onClick={() => navigate(-1)} aria-label="Back" className="btn btn-secondary mb-4 page-back" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none' }}>
             <ArrowLeft size={16} /> Back
           </button>
           <h1 className="text-h1 flex items-center gap-3">
             {student.profile_image ? (
               <img src={student.profile_image} alt={student.full_name} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
             ) : (
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={24} /></div>
+              <Avatar name={student.full_name} size="lg" />
             )}
             {student.full_name}
-            <span style={{ fontSize: '0.875rem', padding: '0.25rem 0.75rem', backgroundColor: 'rgba(94, 106, 210, 0.1)', color: 'var(--color-primary)', borderRadius: 'var(--radius-full)' }}>Active</span>
+            <span style={{ fontSize: '0.875rem', padding: '0.25rem 0.75rem', backgroundColor: 'var(--surface-sunken)', color: 'var(--text-secondary)', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>Active</span>
             <span style={{ 
               fontSize: '0.875rem', 
               padding: '0.25rem 0.75rem', 
               backgroundColor: student.risk_level === 'High' ? 'rgba(239, 68, 68, 0.1)' : student.risk_level === 'Medium' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(74, 222, 128, 0.1)',
-              color: student.risk_level === 'High' ? '#ef4444' : student.risk_level === 'Medium' ? '#f59e0b' : '#4ade80',
+              color: student.risk_level === 'High' ? 'var(--accent-red)' : student.risk_level === 'Medium' ? 'var(--accent-amber)' : 'var(--accent-green)',
               borderRadius: 'var(--radius-full)',
               fontWeight: 600
             }}>Risk: {student.risk_level || 'Low'}</span>
@@ -556,7 +558,7 @@ export const StudentProfile: React.FC = () => {
             whileTap={{ scale: 0.95 }} 
             className="btn btn-secondary" 
             onClick={() => setIsReportModalOpen(true)}
-            style={{ backgroundColor: 'rgba(94, 106, 210, 0.1)', color: 'var(--color-primary)', borderColor: 'transparent' }}
+            style={{}}
           >
             <FileDown size={18} /> Generate Report
           </motion.button>
@@ -570,7 +572,7 @@ export const StudentProfile: React.FC = () => {
               setActiveDraftLogId(undefined);
               setActiveDraftData({});
             }}
-            style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderColor: 'transparent' }}
+            style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-green)', borderColor: 'transparent' }}
           >
             <BrainCircuit size={18} /> Live Assessment
           </motion.button>
@@ -580,20 +582,23 @@ export const StudentProfile: React.FC = () => {
             whileHover={{ scale: 1.05 }} 
             whileTap={{ scale: 0.95 }} 
             className="btn btn-primary" 
-            style={{ background: 'linear-gradient(135deg, var(--color-primary), #8b5cf6)', border: 'none', boxShadow: '0 4px 12px rgba(94, 106, 210, 0.3)' }}
+            style={{ background: 'var(--color-primary)', border: 'none', boxShadow: 'none' }}
           >
             <Edit2 size={18} /> Edit Profile
           </motion.button>
         </div>
       </motion.div>
 
+      <JourneyStrip studentUuid={student.id} />
+
       {/* Tabs — Profile (static reference) / History (what happened) / Telemetry
           (the numbers) / Summary (what the AI thinks). History and Summary each
           carry their own Raw-vs-Formal / Quick-vs-Technical toggle rather than
           becoming yet more top-level tabs — one "fast view / deep view" pattern,
           reused twice, is easier to learn than a flat pile of destinations. */}
-      <div className="flex gap-4 mb-6" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+      <div className="tab-bar" role="tablist">
         <button
+          role="tab" aria-selected={activeTab === 'profile'}
           onClick={() => setActiveTab('profile')}
           style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem 1rem',
@@ -606,6 +611,7 @@ export const StudentProfile: React.FC = () => {
           Profile
         </button>
         <button
+          role="tab" aria-selected={activeTab === 'history'}
           onClick={() => setActiveTab('history')}
           style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem 1rem',
@@ -618,6 +624,7 @@ export const StudentProfile: React.FC = () => {
           History
         </button>
         <button
+          role="tab" aria-selected={activeTab === 'telemetry'}
           onClick={() => setActiveTab('telemetry')}
           style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem 1rem',
@@ -630,6 +637,7 @@ export const StudentProfile: React.FC = () => {
           Telemetry
         </button>
         <button
+          role="tab" aria-selected={activeTab === 'summary'}
           onClick={() => setActiveTab('summary')}
           style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem 1rem',
@@ -712,7 +720,7 @@ export const StudentProfile: React.FC = () => {
 
 
           {/* ── Tags Section (inside left card) ── */}
-          <div className="no-print" style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="no-print" style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgb(var(--ink) / 0.056)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
                 <Tag size={12} /> Tags
@@ -1008,7 +1016,7 @@ export const StudentProfile: React.FC = () => {
 
           {(engineStatus === 'cold_start' || !engineStatus) ? (
             <div className="bento-card col-span-12" style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: '0.75rem' }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: 'rgb(var(--ink) / 0.040)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)', marginBottom: '0.75rem' }}>
                 <Activity size={24} />
               </div>
               <p style={{ fontWeight: 600, fontSize: '0.925rem', marginBottom: '0.75rem' }}>
@@ -1022,14 +1030,14 @@ export const StudentProfile: React.FC = () => {
           ) : (
             <>
               {engineStatus === 'stale' && (
-                <div className="bento-card col-span-12" style={{ backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid #ef4444', color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="bento-card col-span-12" style={{ backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid var(--accent-red)', color: 'var(--accent-red)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <AlertTriangle size={18} /> Data is expired (90+ days old) — schedule a re-assessment.
                 </div>
               )}
 
               {telemetry?.archetype && telemetry.archetype !== 'Pending Baseline Assessment' && (
                 <div className="bento-card col-span-12" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                  <Sparkles size={16} style={{ color: '#818cf8' }} />
+                  <Sparkles size={16} style={{ color: 'var(--accent-blue)' }} />
                   <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)', fontWeight: 700 }}>Archetype</span>
                   <span style={{ fontSize: '0.925rem', fontWeight: 700 }}>{telemetry.archetype}</span>
                   <span className="text-muted" style={{ fontSize: '0.75rem' }}>
@@ -1112,10 +1120,10 @@ export const StudentProfile: React.FC = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 16 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ width: '100%', maxWidth: '480px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-surface)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }}
+              style={{ width: '100%', maxWidth: '480px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-surface)', border: '1px solid rgb(var(--ink) / 0.080)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }}
             >
               {/* Modal Header */}
-              <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+              <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgb(var(--ink) / 0.056)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                   <Tag size={16} style={{ color: 'var(--color-primary)' }} />
                   <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>Manage Tags</h3>
@@ -1126,7 +1134,7 @@ export const StudentProfile: React.FC = () => {
               </div>
 
               {/* Search */}
-              <div style={{ padding: '0.875rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+              <div style={{ padding: '0.875rem 1.5rem', borderBottom: '1px solid rgb(var(--ink) / 0.040)', flexShrink: 0 }}>
                 <input
                   type="text"
                   className="input"
@@ -1165,7 +1173,7 @@ export const StudentProfile: React.FC = () => {
                               key={tag.id}
                               onClick={() => handleToggleTag(tag)}
                               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.75rem', borderRadius: 'var(--radius-md)', border: 'none', cursor: 'pointer', backgroundColor: isAssigned ? `${tag.color_hex}15` : 'transparent', transition: 'background-color 0.15s ease' }}
-                              onMouseEnter={e => { if (!isAssigned) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; }}
+                              onMouseEnter={e => { if (!isAssigned) e.currentTarget.style.backgroundColor = 'rgb(var(--ink) / 0.032)'; }}
                               onMouseLeave={e => { e.currentTarget.style.backgroundColor = isAssigned ? `${tag.color_hex}15` : 'transparent'; }}
                             >
                               <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -1186,7 +1194,7 @@ export const StudentProfile: React.FC = () => {
               </div>
 
               {/* Footer */}
-              <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.07)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgb(var(--ink) / 0.056)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>{studentTags.length} tag{studentTags.length !== 1 ? 's' : ''} assigned</span>
                 <button onClick={() => setIsTagModalOpen(false)} className="btn btn-primary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>Done</button>
               </div>

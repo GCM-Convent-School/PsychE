@@ -153,7 +153,7 @@ export const BulkSchedule: React.FC = () => {
       
       <div className="flex justify-between items-center mb-6 mobile-stack mobile-stack-start" style={{ gap: '1rem' }}>
         <div>
-          <button onClick={() => navigate(-1)} className="btn btn-secondary mb-4" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none' }}>
+          <button onClick={() => navigate(-1)} aria-label="Back" className="btn btn-secondary mb-4 page-back" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none' }}>
             <ArrowLeft size={16} /> Back
           </button>
           <h1 className="text-h1 flex items-center gap-3"><Calendar size={28} /> Bulk Auto-Scheduler</h1>
@@ -177,7 +177,7 @@ export const BulkSchedule: React.FC = () => {
               <p style={{
                 display: 'flex', alignItems: 'center', gap: '0.3rem',
                 fontSize: '0.8125rem', fontWeight: 600, marginTop: '0.4rem',
-                color: isSunday(startDate) ? '#f87171' : 'var(--color-text-muted)'
+                color: isSunday(startDate) ? 'var(--accent-red)' : 'var(--color-text-muted)'
               }}>
                 {isSunday(startDate) && <AlertTriangle size={13} />}
                 {getWeekdayName(startDate)}
@@ -200,7 +200,7 @@ export const BulkSchedule: React.FC = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`btn btn-primary ${selectedIds.size === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-            style={{ width: '100%', padding: '1rem', background: 'linear-gradient(135deg, var(--color-primary), #8b5cf6)', border: 'none' }}
+            style={{ width: '100%', padding: '1rem', background: 'var(--color-primary)', border: 'none' }}
           >
             {scheduling ? 'Scheduling...' : 'Auto-Distribute Sessions'}
           </motion.button>

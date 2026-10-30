@@ -75,7 +75,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({ studentName, currentD
         style={{
           width: '100%', maxWidth: '420px',
           backgroundColor: 'var(--color-surface)',
-          border: '1px solid rgba(255,255,255,0.1)',
+          border: '1px solid rgb(var(--ink) / 0.080)',
           borderRadius: 'var(--radius-lg)',
           boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
           overflow: 'hidden'
@@ -84,7 +84,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({ studentName, currentD
         {/* Modal Header */}
         <div style={{
           padding: '1.5rem 1.75rem 1.25rem',
-          borderBottom: '1px solid rgba(255,255,255,0.07)'
+          borderBottom: '1px solid rgb(var(--ink) / 0.056)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.375rem' }}>
             <div style={{ padding: '0.5rem', borderRadius: '10px', backgroundColor: 'rgba(94,106,210,0.15)', display: 'flex' }}>
@@ -122,7 +122,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({ studentName, currentD
             <p style={{
               display: 'flex', alignItems: 'center', gap: '0.35rem',
               marginTop: '0.5rem', fontSize: '0.8125rem', fontWeight: isSunday(selectedDate) ? 700 : 400,
-              color: isSunday(selectedDate) ? '#f87171' : 'var(--color-text-muted)'
+              color: isSunday(selectedDate) ? 'var(--accent-red)' : 'var(--color-text-muted)'
             }}>
               {isSunday(selectedDate) && <AlertCircle size={13} />}
               {new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(selectedDate + 'T12:00:00'))}
@@ -134,7 +134,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({ studentName, currentD
         {/* Actions Footer */}
         <div style={{
           padding: '1.125rem 1.75rem 1.5rem',
-          borderTop: '1px solid rgba(255,255,255,0.07)',
+          borderTop: '1px solid rgb(var(--ink) / 0.056)',
           display: 'flex', gap: '0.75rem', justifyContent: 'flex-end'
         }}>
           <button
@@ -142,13 +142,13 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({ studentName, currentD
             style={{
               padding: '0.625rem 1.25rem', borderRadius: 'var(--radius-md)',
               fontSize: '0.875rem', fontWeight: 600,
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgb(var(--ink) / 0.048)',
+              border: '1px solid rgb(var(--ink) / 0.080)',
               color: 'var(--color-text-muted)', cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--color-text)'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--color-text-muted)'; }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgb(var(--ink) / 0.080)'; e.currentTarget.style.color = 'var(--color-text)'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgb(var(--ink) / 0.048)'; e.currentTarget.style.color = 'var(--color-text-muted)'; }}
           >
             Cancel
           </button>
@@ -158,9 +158,9 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({ studentName, currentD
             style={{
               padding: '0.625rem 1.375rem', borderRadius: 'var(--radius-md)',
               fontSize: '0.875rem', fontWeight: 700,
-              background: !selectedDate ? 'rgba(94,106,210,0.3)' : 'linear-gradient(135deg, var(--color-primary), #8b5cf6)',
+              background: !selectedDate ? 'rgba(94,106,210,0.3)' : 'var(--color-primary)',
               border: 'none',
-              color: !selectedDate ? 'rgba(255,255,255,0.35)' : 'white',
+              color: !selectedDate ? 'rgb(var(--ink) / 0.280)' : 'var(--on-primary)',
               cursor: !selectedDate ? 'not-allowed' : 'pointer',
               transition: 'all 0.15s ease',
               display: 'flex', alignItems: 'center', gap: '0.4rem'
@@ -185,9 +185,9 @@ interface ActionIconProps {
 
 const ActionIcon: React.FC<ActionIconProps> = ({ icon, tooltip, onClick, variant = 'default' }) => {
   const colors = {
-    default: { base: 'rgba(255,255,255,0)', hover: 'rgba(255,255,255,0.1)', icon: 'rgba(255,255,255,0.45)', iconHover: 'rgba(255,255,255,0.9)' },
-    danger:  { base: 'rgba(239,68,68,0)', hover: 'rgba(239,68,68,0.15)', icon: 'rgba(239,68,68,0.55)', iconHover: '#f87171' },
-    primary: { base: 'rgba(94,106,210,0)', hover: 'rgba(94,106,210,0.18)', icon: 'rgba(94,106,210,0.7)', iconHover: '#818cf8' },
+    default: { base: 'rgba(255,255,255,0)', hover: 'rgb(var(--ink) / 0.080)', icon: 'rgb(var(--ink) / 0.360)', iconHover: 'rgb(var(--ink) / 0.500)' },
+    danger:  { base: 'rgba(239,68,68,0)', hover: 'rgba(239,68,68,0.15)', icon: 'rgba(239,68,68,0.55)', iconHover: 'var(--accent-red)' },
+    primary: { base: 'rgba(94,106,210,0)', hover: 'rgba(94,106,210,0.18)', icon: 'rgba(94,106,210,0.7)', iconHover: 'var(--accent-blue)' },
   }[variant];
 
   const [hovered, setHovered] = useState(false);
@@ -422,12 +422,12 @@ export const KanbanBoard: React.FC = () => {
               variants={item}
               style={{
                 minWidth: '300px', width: '300px', flexShrink: 0,
-                backgroundColor: 'rgba(24, 27, 33, 0.45)',
+                backgroundColor: 'var(--bg-tertiary)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
                 border: day.isOverdue
                   ? '1px solid rgba(239,68,68,0.2)'
-                  : day.isSundayCol ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(255,255,255,0.06)',
+                  : day.isSundayCol ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgb(var(--ink) / 0.048)',
                 borderRadius: 'var(--radius-lg)',
                 display: 'flex', flexDirection: 'column',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.15)'
@@ -436,24 +436,24 @@ export const KanbanBoard: React.FC = () => {
               {/* Column Header */}
               <div style={{
                 padding: '1rem 1.25rem',
-                borderBottom: '1px solid rgba(255,255,255,0.07)',
+                borderBottom: '1px solid rgb(var(--ink) / 0.056)',
                 backgroundColor: day.isOverdue
                   ? 'rgba(239,68,68,0.12)'
-                  : day.isSundayCol ? 'rgba(245,158,11,0.08)' : 'rgba(0,0,0,0.15)',
+                  : day.isSundayCol ? 'rgba(245,158,11,0.08)' : 'transparent',
                 borderTopLeftRadius: 'var(--radius-lg)',
                 borderTopRightRadius: 'var(--radius-lg)'
               }}>
                 <h3 style={{
                   display: 'flex', alignItems: 'center', gap: '0.4rem',
                   fontWeight: 700, fontSize: '1rem', marginBottom: '0.5rem',
-                  color: day.isOverdue ? '#f87171' : day.isSundayCol ? '#f59e0b' : 'var(--color-text)'
+                  color: day.isOverdue ? 'var(--accent-red)' : day.isSundayCol ? 'var(--accent-amber)' : 'var(--color-text)'
                 }}>
                   {day.isSundayCol && <AlertCircle size={14} />}
                   {day.label}
                 </h3>
                 {!day.isOverdue && day.dateStr !== 'later' && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                    <div style={{ flex: 1, height: '3px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ flex: 1, height: '3px', backgroundColor: 'rgb(var(--ink) / 0.064)', borderRadius: '2px', overflow: 'hidden' }}>
                       <div style={{
                         height: '100%',
                         width: `${Math.min(100, (day.capacity.booked / day.capacity.total) * 100)}%`,
@@ -464,8 +464,8 @@ export const KanbanBoard: React.FC = () => {
                     <span style={{
                       fontSize: '0.6875rem', fontWeight: 700,
                       padding: '0.15rem 0.5rem', borderRadius: '4px',
-                      backgroundColor: isFull ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.06)',
-                      color: isFull ? '#f59e0b' : 'var(--color-text-muted)',
+                      backgroundColor: isFull ? 'rgba(245,158,11,0.15)' : 'rgb(var(--ink) / 0.048)',
+                      color: isFull ? 'var(--accent-amber)' : 'var(--color-text-muted)',
                       whiteSpace: 'nowrap'
                     }}>
                       {day.capacity.booked} / {day.capacity.total}
@@ -478,7 +478,7 @@ export const KanbanBoard: React.FC = () => {
                   </p>
                 )}
                 {day.isOverdue && (
-                  <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#f87171' }}>
+                  <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-red)' }}>
                     {day.logs.length} Missed Session{day.logs.length !== 1 ? 's' : ''}
                   </p>
                 )}
@@ -494,7 +494,7 @@ export const KanbanBoard: React.FC = () => {
                   <div style={{
                     textAlign: 'center', padding: '2.5rem 1rem',
                     color: 'var(--color-text-muted)', fontSize: '0.8125rem',
-                    border: '1px dashed rgba(255,255,255,0.07)', borderRadius: 'var(--radius-md)'
+                    border: '1px dashed rgb(var(--ink) / 0.056)', borderRadius: 'var(--radius-md)'
                   }}>
                     No sessions scheduled
                   </div>
@@ -510,8 +510,8 @@ export const KanbanBoard: React.FC = () => {
                         onDragStart={e => handleDragStart(e, log.id)}
                         onDragEnd={handleDragEnd}
                         style={{
-                          backgroundColor: day.isOverdue ? 'rgba(239,68,68,0.06)' : 'rgba(30,33,42,0.85)',
-                          border: `1px solid ${day.isOverdue ? 'rgba(239,68,68,0.25)' : 'rgba(255,255,255,0.08)'}`,
+                          backgroundColor: day.isOverdue ? 'rgba(239,68,68,0.06)' : 'var(--bg-tertiary)',
+                          border: `1px solid ${day.isOverdue ? 'rgba(239,68,68,0.25)' : 'rgb(var(--ink) / 0.064)'}`,
                           borderRadius: 'var(--radius-md)',
                           padding: '0.875rem 1rem',
                           display: 'flex', flexDirection: 'column',
@@ -522,12 +522,12 @@ export const KanbanBoard: React.FC = () => {
                         onMouseEnter={e => {
                           e.currentTarget.style.transform = 'translateY(-2px)';
                           e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
-                          e.currentTarget.style.borderColor = day.isOverdue ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.14)';
+                          e.currentTarget.style.borderColor = day.isOverdue ? 'rgba(239,68,68,0.4)' : 'rgb(var(--ink) / 0.112)';
                         }}
                         onMouseLeave={e => {
                           e.currentTarget.style.transform = 'none';
                           e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-                          e.currentTarget.style.borderColor = day.isOverdue ? 'rgba(239,68,68,0.25)' : 'rgba(255,255,255,0.08)';
+                          e.currentTarget.style.borderColor = day.isOverdue ? 'rgba(239,68,68,0.25)' : 'rgb(var(--ink) / 0.064)';
                         }}
                       >
                         {/* Card Top Row: Name + Actions */}
@@ -547,7 +547,7 @@ export const KanbanBoard: React.FC = () => {
                                 fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
                                 padding: '0.15rem 0.45rem', borderRadius: '4px',
                                 backgroundColor: riskLevel === 'High' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
-                                color: riskLevel === 'High' ? '#f87171' : '#fbbf24',
+                                color: riskLevel === 'High' ? 'var(--accent-red)' : 'var(--accent-amber)',
                               }}>
                                 <AlertCircle size={9} /> {riskLevel} Risk
                               </span>
@@ -584,7 +584,7 @@ export const KanbanBoard: React.FC = () => {
                         </p>
 
                         {/* CTA Buttons */}
-                        <div style={{ marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <div style={{ marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid rgb(var(--ink) / 0.048)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                           <button
                             onClick={e => { e.stopPropagation(); navigate(`/add-log?schedule_id=${log.id}`); }}
                             style={{
@@ -592,13 +592,13 @@ export const KanbanBoard: React.FC = () => {
                               borderRadius: 'var(--radius-full)',
                               fontSize: '0.75rem', fontWeight: 700,
                               backgroundColor: 'rgba(74,222,128,0.12)',
-                              color: '#86efac',
+                              color: 'var(--accent-green)',
                               border: '1px solid rgba(74,222,128,0.25)',
                               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem',
                               transition: 'all 0.15s ease'
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(74,222,128,0.2)'; e.currentTarget.style.color = '#4ade80'; }}
-                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(74,222,128,0.12)'; e.currentTarget.style.color = '#86efac'; }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(74,222,128,0.2)'; e.currentTarget.style.color = 'var(--accent-green)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(74,222,128,0.12)'; e.currentTarget.style.color = 'var(--accent-green)'; }}
                           >
                             <CheckCircle2 size={13} /> Complete Session
                           </button>
@@ -615,7 +615,7 @@ export const KanbanBoard: React.FC = () => {
                               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem',
                               transition: 'all 0.15s ease'
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.18)'; e.currentTarget.style.color = '#f87171'; }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.18)'; e.currentTarget.style.color = 'var(--accent-red)'; }}
                             onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = 'rgba(248,113,113,0.8)'; }}
                           >
                             <XCircle size={13} /> Mark No-Show

@@ -260,9 +260,9 @@ export const Dashboard: React.FC = () => {
 
   const getColorForReason = (reason: string) => {
     if (reason.toLowerCase().includes('stress')) return '#3b82f6'; // Neutral blue, reserved red for high risk
-    if (reason.toLowerCase().includes('career')) return '#5e6ad2';
-    if (reason.toLowerCase().includes('conflict')) return '#f59e0b';
-    return '#4ade80';
+    if (reason.toLowerCase().includes('career')) return 'var(--accent-blue)';
+    if (reason.toLowerCase().includes('conflict')) return 'var(--accent-amber)';
+    return 'var(--accent-green)';
   };
 
   /**
@@ -756,7 +756,7 @@ export const Dashboard: React.FC = () => {
                 <motion.div
                   key={log.id}
                   onClick={() => navigate(`/student/${log.student_sid || log.student_uuid}`)}
-                  whileHover={{ x: 5, backgroundColor: 'rgba(255,255,255,0.03)' }}
+                  whileHover={{ x: 5, backgroundColor: 'rgb(var(--ink) / 0.024)' }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -822,7 +822,7 @@ export const Dashboard: React.FC = () => {
             <ToolButton
               onClick={downloadCsvTemplate}
               icon={<Download size={20} className="text-muted" />}
-              tint="rgba(255, 255, 255, 0.05)"
+              tint="rgb(var(--ink) / 0.040)"
               title="Template"
               sub="Download CSV format"
             />

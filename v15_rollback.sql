@@ -31,7 +31,9 @@ BEGIN
   FOR t IN
     SELECT tablename FROM pg_tables
     WHERE schemaname = 'public' AND tablename ILIKE 'psyche\_%'
-      AND tablename NOT IN ('PsychE_Staff','PsychE_Staff_Secrets','PsychE_Audit')
+      -- Staff, audit and the Release 3 tables stay closed: the PIN app never used them.
+      AND tablename NOT IN ('PsychE_Staff','PsychE_Staff_Secrets','PsychE_Audit',
+                            'PsychE_Cases','PsychE_Referrals')
   LOOP
     EXECUTE format('GRANT ALL ON public.%I TO anon', t);
     EXECUTE format('CREATE POLICY %I ON public.%I FOR ALL USING (true) WITH CHECK (true)',

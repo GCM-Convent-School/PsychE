@@ -36,7 +36,7 @@ const SchoolMark: React.FC = () => {
   return (
     <div style={{
       width: '60px', height: '60px', borderRadius: '50%',
-      background: 'linear-gradient(135deg, var(--color-primary), #8b5cf6)',
+      background: 'var(--color-primary)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       marginBottom: '1.25rem', boxShadow: '0 8px 16px rgba(94, 106, 210, 0.4)',
     }}>
@@ -52,7 +52,7 @@ const Notice: React.FC<{ tone: 'error' | 'info'; children: React.ReactNode }> = 
     animate={{ opacity: 1, height: 'auto' }}
     style={{
       display: 'flex', alignItems: 'flex-start', gap: '0.5rem', width: '100%',
-      color: tone === 'error' ? '#ef4444' : '#22a06b',
+      color: tone === 'error' ? 'var(--accent-red)' : 'var(--accent-green)',
       backgroundColor: tone === 'error' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 160, 107, 0.1)',
       padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem',
       fontSize: '0.875rem', fontWeight: 500,
@@ -158,8 +158,8 @@ const LoginScreen: React.FC = () => {
             className="btn btn-primary"
             style={{
               width: '100%', padding: '1rem', border: 'none', transition: 'all 0.3s',
-              background: canSubmit ? 'linear-gradient(135deg, var(--color-primary), #8b5cf6)' : 'var(--color-surface)',
-              color: canSubmit ? 'white' : 'var(--color-text-muted)',
+              background: canSubmit ? 'var(--color-primary)' : 'var(--color-surface)',
+              color: canSubmit ? 'var(--on-primary)' : 'var(--color-text-muted)',
               opacity: canSubmit ? 1 : 0.6,
               cursor: canSubmit ? 'pointer' : 'not-allowed',
             }}

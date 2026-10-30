@@ -17,7 +17,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
-export type StaffRole = 'counsellor' | 'principal' | 'admin';
+export type StaffRole = 'counsellor' | 'principal' | 'admin' | 'teacher';
 
 export interface StaffMember {
   id: string;
@@ -68,8 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .select('id, full_name, mobile, role, active')
       .eq('user_id', next.user.id)
       .maybeSingle();
-    // Principals sign in from Release 3, when their aggregate views exist (D12).
-    if (data && data.active && data.role !== 'principal') {
+    // Principals and teachers sign in from Release 3, when their screens exist (D12).
+    if (data && data.active && (data.role === 'counsellor' || data.role === 'admin')) {
       setStaff({ id: data.id, full_name: data.full_name, mobile: data.mobile, role: data.role });
       setStatus('signedIn');
     } else {

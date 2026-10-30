@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Settings as SettingsIcon, BookOpen, Tag, Cpu, Users } from 'lucide-react';
+import { ArrowLeft, Save, Settings as SettingsIcon, BookOpen, Tag, Cpu, Users, CalendarClock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { getDailyCapacity } from '../lib/capacity';
@@ -8,6 +8,7 @@ import { LibraryManager } from '../components/LibraryManager';
 import { GlobalTagManager } from '../components/GlobalTagManager';
 import { AIModelSettings } from '../components/AIModelSettings';
 import { StaffManager } from '../components/StaffManager';
+import { RhythmSettings } from '../components/RhythmSettings';
 import { useAuth } from '../lib/auth';
 import { refreshBranding } from '../lib/branding';
 
@@ -169,9 +170,9 @@ const SystemSettingsTab: React.FC = () => {
             </div>
             <div className="flex gap-2 flex-wrap">
               {courses.map(course => (
-                <div key={course.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.1)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.875rem' }}>
+                <div key={course.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgb(var(--ink) / 0.080)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.875rem' }}>
                   {course.course_name}
-                  <button type="button" onClick={() => handleDeleteCourse(course.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', fontSize: '1.2rem', lineHeight: 1 }}>&times;</button>
+                  <button type="button" onClick={() => handleDeleteCourse(course.id)} style={{ background: 'none', border: 'none', color: 'var(--accent-red)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', fontSize: '1.2rem', lineHeight: 1 }}>&times;</button>
                 </div>
               ))}
               {courses.length === 0 && <span className="text-muted text-sm">No courses added yet.</span>}
@@ -195,7 +196,7 @@ const SystemSettingsTab: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn btn-primary"
-              style={{ background: 'linear-gradient(135deg, var(--color-primary), #8b5cf6)', border: 'none', padding: '0.75rem 2rem' }}
+              style={{ background: 'var(--color-primary)', border: 'none', padding: '0.75rem 2rem' }}
             >
               {saving ? 'Saving...' : <><Save size={18} /> Save Settings</>}
             </motion.button>
@@ -215,14 +216,14 @@ export const Settings: React.FC = () => {
   const navigate = useNavigate();
   const { staff } = useAuth();
   const isAdmin = staff?.role === 'admin';
-  const [activeTab, setActiveTab] = useState<'system' | 'library' | 'tags' | 'ai' | 'staff'>(isAdmin ? 'system' : 'library');
+  const [activeTab, setActiveTab] = useState<'system' | 'rhythm' | 'library' | 'tags' | 'ai' | 'staff'>(isAdmin ? 'system' : 'library');
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" style={{ padding: '1rem 0', maxWidth: '1000px', margin: '0 auto' }}>
       
       <div className="flex justify-between items-center mb-6 mobile-stack mobile-stack-start" style={{ gap: '1rem' }}>
         <div>
-          <button onClick={() => navigate(-1)} className="btn btn-secondary mb-4" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none' }}>
+          <button onClick={() => navigate(-1)} aria-label="Back" className="btn btn-secondary mb-4 page-back" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none' }}>
             <ArrowLeft size={16} /> Back
           </button>
           <h1 className="text-h1 flex items-center gap-3"><SettingsIcon size={28} /> Configuration</h1>
@@ -231,16 +232,17 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* ── Tab Navigation ── */}
-      <div className="tab-bar" style={{
+      <div className="tab-bar" role="tablist" style={{
         display: 'flex',
         alignItems: 'center',
         gap: '4px',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        borderBottom: '1px solid rgb(var(--ink) / 0.056)',
         marginBottom: '2rem',
         paddingBottom: '0',
       }}>
         {([
           { id: 'system',  label: 'System Settings',  Icon: SettingsIcon, adminOnly: true },
+          { id: 'rhythm',  label: 'Follow-up rhythm',  Icon: CalendarClock, adminOnly: true },
           { id: 'staff',   label: 'Staff',             Icon: Users,        adminOnly: true },
           { id: 'library', label: 'Question Library',  Icon: BookOpen,     adminOnly: false },
           { id: 'tags',    label: 'Global Tags',       Icon: Tag,          adminOnly: false },
@@ -248,6 +250,8 @@ export const Settings: React.FC = () => {
         ] as const).filter(({ adminOnly }) => isAdmin || !adminOnly).map(({ id, label, Icon }) => (
           <button
             key={id}
+            role="tab"
+            aria-selected={activeTab === id}
             onClick={() => setActiveTab(id)}
             style={{
               display: 'inline-flex',
@@ -256,10 +260,10 @@ export const Settings: React.FC = () => {
               padding: '0.625rem 1.125rem',
               fontSize: '0.8125rem',
               fontWeight: activeTab === id ? 600 : 500,
-              color: activeTab === id ? '#f0f0f5' : '#6b7280',
+              color: activeTab === id ? 'var(--text-primary)' : 'var(--text-muted)',
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === id ? '2px solid #5e6ad2' : '2px solid transparent',
+              borderBottom: activeTab === id ? '2px solid var(--color-primary)' : '2px solid transparent',
               marginBottom: '-1px',
               cursor: 'pointer',
               transition: 'color 0.15s ease, border-color 0.15s ease',
@@ -275,6 +279,7 @@ export const Settings: React.FC = () => {
       </div>
 
       {isAdmin && activeTab === 'system' && <SystemSettingsTab />}
+      {isAdmin && activeTab === 'rhythm' && <RhythmSettings />}
       {isAdmin && activeTab === 'staff' && <StaffManager />}
       {activeTab === 'library' && <LibraryManager />}
       {activeTab === 'tags' && <GlobalTagManager />}

@@ -57,7 +57,7 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
       {/* Timeline Dot */}
       <div className="no-print" style={{
         position: 'absolute', left: '-21px', top: '5px', width: '12px', height: '12px', borderRadius: '50%',
-        backgroundColor: isDraft ? '#f59e0b' : hasAssessments ? '#10b981' : 'var(--color-primary)',
+        backgroundColor: isDraft ? 'var(--accent-amber)' : hasAssessments ? 'var(--accent-green)' : 'var(--color-primary)',
         border: '2px solid var(--color-surface)'
       }}></div>
 
@@ -65,7 +65,7 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             {isDraft && (
-              <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.5rem', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '4px', color: '#f59e0b' }}>
+              <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.5rem', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '4px', color: 'var(--accent-amber)' }}>
                 Draft
               </span>
             )}
@@ -73,7 +73,7 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
               {item.interaction_type || 'Session'}
             </span>
             {hasAssessments && !isDraft && (
-              <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.5rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '4px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.5rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '4px', color: 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <BrainCircuit size={10} /> Assessment
               </span>
             )}
@@ -83,7 +83,7 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
               </span>
             )}
             {isFormalized === false && (
-              <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.5rem', backgroundColor: 'rgb(var(--ink) / 0.040)', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: 'var(--text-muted)' }}>
                 Not yet formalized
               </span>
             )}
@@ -97,7 +97,7 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
           <button
             onClick={() => onResumeDraft(item)}
             className="btn btn-secondary"
-            style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', color: '#f59e0b', borderColor: 'transparent', backgroundColor: 'rgba(245, 158, 11, 0.1)' }}
+            style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', color: 'var(--accent-amber)', borderColor: 'transparent', backgroundColor: 'rgba(245, 158, 11, 0.1)' }}
           >
             Resume Draft
           </button>
@@ -122,7 +122,7 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
             const maxPossible = (a.type === 'COMPE' || a.type === 'MIX') ? totalQs * 4 : 'N/A';
             const percentage = maxPossible !== 'N/A' && maxPossible > 0 ? Math.round((totalScore / (maxPossible as number)) * 100) : null;
             return (
-              <span key={i} style={{ fontSize: '0.875rem', fontWeight: 500, color: '#10b981' }}>
+              <span key={i} style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--accent-green)' }}>
                 {a.title}: {percentage !== null ? `${percentage}%` : totalScore}
               </span>
             );
@@ -147,12 +147,12 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
             <div className="mb-4">
               <p className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Full Assessment Receipt</p>
               {(item.assessment_data as any[]).map((a: any, i: number) => (
-                <div key={i} style={{ backgroundColor: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem' }}>
+                <div key={i} style={{ backgroundColor: 'var(--bg-tertiary)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem' }}>
                   <h5 style={{ fontSize: '0.875rem', color: 'var(--color-primary)', marginBottom: '0.75rem' }}>{a.title}</h5>
                   {Object.entries(a.responses).map(([q, ans]: any, j) => (
-                    <div key={j} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '4px', fontSize: '0.875rem', marginBottom: '2px' }}>
+                    <div key={j} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: 'rgb(var(--ink) / 0.016)', borderRadius: '4px', fontSize: '0.875rem', marginBottom: '2px' }}>
                       <span style={{ color: 'var(--color-text-muted)', flex: 1, paddingRight: '1rem' }}>{q}</span>
-                      <strong style={{ color: '#10b981', minWidth: '30px', textAlign: 'right' }}>{ans}</strong>
+                      <strong style={{ color: 'var(--accent-green)', minWidth: '30px', textAlign: 'right' }}>{ans}</strong>
                     </div>
                   ))}
                 </div>
@@ -169,8 +169,8 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
               const st = item.follow_up_status || 'Pending';
               const closed = st === 'Done' || st === 'Cancelled';
               const tone = st === 'Done' ? { bg: 'rgba(63, 201, 143, 0.1)', fg: 'var(--color-success)' }
-                : st === 'Cancelled' ? { bg: 'rgba(255,255,255,0.04)', fg: 'var(--color-text-muted)' }
-                  : { bg: 'rgba(245, 158, 11, 0.1)', fg: '#f59e0b' };
+                : st === 'Cancelled' ? { bg: 'rgb(var(--ink) / 0.032)', fg: 'var(--color-text-muted)' }
+                  : { bg: 'rgba(245, 158, 11, 0.1)', fg: 'var(--accent-amber)' };
               return (
                 <div className="print-action" style={{ flex: 1, backgroundColor: tone.bg, color: tone.fg, padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', fontWeight: 500, minWidth: '200px' }}>
                   <span style={{ fontSize: '0.75rem', display: 'block', opacity: 0.8, marginBottom: '4px', letterSpacing: '0.05em' }}>FOLLOW-UP ({st})</span>

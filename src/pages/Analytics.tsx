@@ -50,7 +50,7 @@ export const Analytics: React.FC = () => {
   if (loading) return <div className="page-loading" style={{ padding: '2rem' }}>Loading programme health…</div>;
   if (error) return (
     <div className="bento-card" style={{ margin: '1rem 0', borderColor: 'rgba(245,91,91,0.4)' }}>
-      <h3 className="text-h3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f55b5b' }}>
+      <h3 className="text-h3" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-red)' }}>
         <AlertTriangle size={18} /> Could not load programme health
       </h3>
       <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>{error}</p>

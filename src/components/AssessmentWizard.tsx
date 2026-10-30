@@ -409,14 +409,14 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
   // Dry Well Block & Quick Question Modal
   if (dryWell) {
     return createPortal(
-      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(10, 10, 15, 0.95)', backdropFilter: 'blur(12px)' }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-tertiary)', backdropFilter: 'blur(12px)' }}>
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
           className="bento-card p-8" style={{ width: '90%', maxWidth: '450px', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', textAlign: 'center' }}
         >
           {!showAddQuestion ? (
             <>
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-red)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
                 <X size={24} />
               </div>
               <h3 className="text-h3 mb-2">No Fresh Questions</h3>
@@ -425,7 +425,7 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
               <button 
                 onClick={() => setShowAddQuestion(true)} 
                 className="btn btn-primary w-full mb-3"
-                style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}
+                style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-green)', border: '1px solid rgba(16, 185, 129, 0.3)' }}
               >
                 + Add New Questions to Library
               </button>
@@ -501,7 +501,7 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
   const renderScale = [1, 2, 3, 4];
 
   return createPortal(
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(10, 10, 15, 0.95)', backdropFilter: 'blur(12px)' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-tertiary)', backdropFilter: 'blur(12px)' }}>
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -533,7 +533,7 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
             <h2 className="text-h1 flex items-center gap-3" style={{ fontSize: '1.5rem' }}>
               <FileText className="text-primary" /> {moduleTitle || 'Daily Mix Assessment'}
             </h2>
-            {logId && !isCompleted && <span style={{ fontSize: '0.75rem', color: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: '0.2rem 0.6rem', borderRadius: '4px', marginTop: '0.5rem', display: 'inline-block' }}>Draft Saved</span>}
+            {logId && !isCompleted && <span style={{ fontSize: '0.75rem', color: 'var(--accent-amber)', backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: '0.2rem 0.6rem', borderRadius: '4px', marginTop: '0.5rem', display: 'inline-block' }}>Draft Saved</span>}
           </div>
           
           <span className="text-muted" style={{ fontWeight: 600, fontSize: '1.1rem' }}>
@@ -586,9 +586,9 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
                       }}
                       style={{
                         flex: 1, padding: '1.25rem 0.5rem', borderRadius: '12px',
-                        backgroundColor: isSelected ? 'var(--color-primary)' : 'rgba(255,255,255,0.03)',
-                        border: isSelected ? '1px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.1)',
-                        color: isSelected ? '#fff' : 'inherit',
+                        backgroundColor: isSelected ? 'var(--color-primary)' : 'rgb(var(--ink) / 0.024)',
+                        border: isSelected ? '1px solid var(--color-primary)' : '1px solid rgb(var(--ink) / 0.080)',
+                        color: isSelected ? 'var(--on-primary)' : 'inherit',
                         cursor: 'pointer', transition: 'all 0.2s',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
                         boxShadow: isSelected ? '0 4px 15px rgba(94, 106, 210, 0.4)' : 'none',
@@ -631,7 +631,7 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({
               onClick={handleFinalSubmit}
               disabled={saving}
               className="btn btn-primary"
-              style={{ padding: '1rem 2.5rem', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontSize: '1rem' }}
+              style={{ padding: '1rem 2.5rem', background: 'var(--accent-green)', border: 'none', fontSize: '1rem' }}
             >
               {saving ? 'Saving...' : 'Complete Assessment'}
             </button>

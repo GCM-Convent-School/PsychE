@@ -20,11 +20,11 @@ import {
 } from 'recharts';
 import { AlertTriangle, TrendingUp, TrendingDown, Minus, Users, Gauge, Activity, ShieldCheck } from 'lucide-react';
 
-const ACCENT = '#5b8af5';          // every data mark
-const NEUTRAL = 'rgba(255,255,255,0.22)'; // context / peers
-const GOOD = '#3fc98f';
-const WARN = '#f5a623';
-const BAD = '#f55b5b';
+const ACCENT = '#2F5BD3';          // every data mark
+const NEUTRAL = 'rgb(var(--ink) / 0.176)'; // context / peers
+const GOOD = '#157A52';
+const WARN = '#B25E09';
+const BAD = '#B42318';
 
 const DOMAIN_LABELS: Record<string, string> = {
   BHV: 'Behavioural', SOC: 'Social', COG: 'Cognitive', EMH: 'Emotional',
@@ -163,11 +163,11 @@ export const DomainProfile: React.FC<DomainProfileProps> = ({
       <div style={{ height: 230, width: '100%' }}>
         <RC width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="76%" data={radarData}>
-            <PolarGrid stroke="rgba(255,255,255,0.12)" />
+            <PolarGrid stroke="rgb(var(--ink) / 0.096)" />
             <PolarAngleAxis dataKey="domain" tick={{ fontSize: 10, fill: 'var(--color-text-muted)' }} />
-            <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(255,255,255,0.15)" tick={{ fontSize: 9, fill: 'var(--color-text-muted)' }} />
+            <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgb(var(--ink) / 0.120)" tick={{ fontSize: 9, fill: 'var(--color-text-muted)' }} />
             <Radar dataKey="score" stroke={ACCENT} fill={ACCENT} fillOpacity={0.3} />
-            <Tooltip contentStyle={{ backgroundColor: '#181b21', borderColor: 'rgba(255,255,255,0.15)', borderRadius: 8, fontSize: 12 }} formatter={(v) => [`${v}%`, 'Score']} />
+            <Tooltip contentStyle={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'rgb(var(--ink) / 0.120)', borderRadius: 8, fontSize: 12 }} formatter={(v) => [`${v}%`, 'Score']} />
           </RadarChart>
         </RC>
       </div>
@@ -181,7 +181,7 @@ export const DomainProfile: React.FC<DomainProfileProps> = ({
             <span style={{ fontSize: '0.75rem', width: 96, flexShrink: 0, color: i === 0 ? BAD : 'var(--color-text)', fontWeight: i === 0 ? 700 : 500 }}>
               {DOMAIN_LABELS[d.code]}
             </span>
-            <div style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+            <div style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: 'rgb(var(--ink) / 0.056)', overflow: 'hidden' }}>
               <div style={{ width: `${d.pct}%`, height: '100%', borderRadius: 3, backgroundColor: ACCENT }} />
             </div>
             <span style={{ fontSize: '0.75rem', width: 34, textAlign: 'right', color: 'var(--color-text-muted)' }}>{d.pct}%</span>
@@ -190,7 +190,7 @@ export const DomainProfile: React.FC<DomainProfileProps> = ({
         {codes.filter(c => domainScores[c] == null).map(c => (
           <div key={c} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', opacity: 0.5 }}>
             <span style={{ fontSize: '0.75rem', width: 96, flexShrink: 0, color: 'var(--color-text-muted)' }}>{DOMAIN_LABELS[c]}</span>
-            <div style={{ flex: 1, height: 6, borderRadius: 3, border: '1px dashed rgba(255,255,255,0.15)' }} />
+            <div style={{ flex: 1, height: 6, borderRadius: 3, border: '1px dashed rgb(var(--ink) / 0.120)' }} />
             <span style={{ fontSize: '0.6875rem', width: 90, textAlign: 'right', color: 'var(--color-text-muted)' }}>
               {instrumented[c] ? 'not assessed' : 'no items'}
             </span>
@@ -240,10 +240,10 @@ export const TensionStrip: React.FC<{ axes: TensionAxis[]; threshold: number; do
 
             <div style={{ position: 'relative', height: 16, display: 'flex', alignItems: 'center' }}>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center' }}>
-                <div style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+                <div style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: 'rgb(var(--ink) / 0.048)' }} />
               </div>
               {/* centre tick */}
-              <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(255,255,255,0.25)' }} />
+              <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, backgroundColor: 'rgb(var(--ink) / 0.200)' }} />
               {v != null && (
                 <div style={{
                   position: 'absolute',
@@ -335,7 +335,7 @@ export const EngagementPanel: React.FC<EngagementPanelProps> = ({
                 <span style={{ fontSize: '0.75rem', color: 'var(--color-text)' }}>{r.k}</span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{r.v}%</span>
               </div>
-              <div style={{ height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+              <div style={{ height: 6, borderRadius: 3, backgroundColor: 'rgb(var(--ink) / 0.056)', overflow: 'hidden' }}>
                 <div style={{ width: `${r.v}%`, height: '100%', borderRadius: 3, backgroundColor: ACCENT }} />
               </div>
             </div>
@@ -361,7 +361,7 @@ export const EngagementPanel: React.FC<EngagementPanelProps> = ({
                   <XAxis dataKey="date" hide />
                   <YAxis domain={[0, 100]} hide />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#181b21', borderColor: 'rgba(255,255,255,0.15)', borderRadius: 8, fontSize: 12 }}
+                    contentStyle={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'rgb(var(--ink) / 0.120)', borderRadius: 8, fontSize: 12 }}
                     formatter={(v) => [`${v}`, 'ETI']}
                   />
                   <Line type="monotone" dataKey="eti" stroke={ACCENT} strokeWidth={2} dot={{ r: 3, fill: ACCENT }} />
@@ -421,7 +421,7 @@ export const CompositeContribution: React.FC<CompositeContributionProps> = ({
       </p>
 
       {gated ? (
-        <div style={{ padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px dashed var(--color-border)', marginBottom: '0.875rem' }}>
+        <div style={{ padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgb(var(--ink) / 0.024)', border: '1px dashed var(--color-border)', marginBottom: '0.875rem' }}>
           <p style={{ fontWeight: 600, fontSize: '0.925rem', marginBottom: '0.35rem' }}>Insufficient Assessment Data</p>
           <p className="text-muted" style={{ fontSize: '0.8125rem' }}>
             Only {Math.round(confidence * 4)} of 4 components available — at least 2 are needed before an
@@ -449,7 +449,7 @@ export const CompositeContribution: React.FC<CompositeContributionProps> = ({
                 {r.contribution.toFixed(1)} pts <span style={{ opacity: 0.6 }}>· raw {r.raw.toFixed(0)} × {Math.round(r.weight * 100)}%</span>
               </span>
             </div>
-            <div style={{ height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+            <div style={{ height: 8, borderRadius: 4, backgroundColor: 'rgb(var(--ink) / 0.056)', overflow: 'hidden' }}>
               <div style={{ width: `${(r.contribution / maxContribution) * 100}%`, height: '100%', borderRadius: 4, backgroundColor: ACCENT }} />
             </div>
           </div>
@@ -507,13 +507,13 @@ export const RsiPanel: React.FC<RsiPanelProps> = ({
     return (
       <div className="bento-card col-span-6">
         {header}
-        <div style={{ padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px dashed var(--color-border)' }}>
+        <div style={{ padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgb(var(--ink) / 0.024)', border: '1px dashed var(--color-border)' }}>
           <p style={{ fontWeight: 600, fontSize: '0.925rem', marginBottom: '0.4rem' }}>Profile not comparable yet</p>
           <p className="text-muted" style={{ fontSize: '0.8125rem', marginBottom: '0.75rem' }}>
             Ranking requires comparable evidence on both sides. This student's composite rests on
             {' '}{Math.round(confidence * 4)} of 4 components — below the {Math.round(minConfidence * 4)}-component minimum.
           </p>
-          <div style={{ height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+          <div style={{ height: 6, borderRadius: 3, backgroundColor: 'rgb(var(--ink) / 0.056)', overflow: 'hidden' }}>
             <div style={{ width: `${(confidence / minConfidence) * 100}%`, height: '100%', borderRadius: 3, backgroundColor: WARN }} />
           </div>
           <p className="text-muted" style={{ fontSize: '0.6875rem', marginTop: '0.4rem' }}>
@@ -534,7 +534,7 @@ export const RsiPanel: React.FC<RsiPanelProps> = ({
     return (
       <div className="bento-card col-span-6">
         {header}
-        <div style={{ padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px dashed var(--color-border)' }}>
+        <div style={{ padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgb(var(--ink) / 0.024)', border: '1px dashed var(--color-border)' }}>
           <p style={{ fontWeight: 600, fontSize: '0.925rem', marginBottom: '0.4rem' }}>Cohort not ready</p>
           <p className="text-muted" style={{ fontSize: '0.8125rem', marginBottom: '0.75rem' }}>
             A percentile needs at least {requiredPeers} students with a sufficiently complete profile.
@@ -544,7 +544,7 @@ export const RsiPanel: React.FC<RsiPanelProps> = ({
             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: ACCENT }}>{cohortNow}</span>
             <span className="text-muted" style={{ fontSize: '0.8125rem' }}>of {requiredPeers} comparable students</span>
           </div>
-          <div style={{ height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+          <div style={{ height: 8, borderRadius: 4, backgroundColor: 'rgb(var(--ink) / 0.056)', overflow: 'hidden' }}>
             <div style={{ width: `${pct}%`, height: '100%', borderRadius: 4, backgroundColor: ACCENT }} />
           </div>
           <p className="text-muted" style={{ fontSize: '0.6875rem', marginTop: '0.5rem' }}>
@@ -594,8 +594,8 @@ export const RsiPanel: React.FC<RsiPanelProps> = ({
             <XAxis dataKey="bin" tick={{ fontSize: 9, fill: 'var(--color-text-muted)' }} tickLine={false} axisLine={false} />
             <YAxis hide />
             <Tooltip
-              cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-              contentStyle={{ backgroundColor: '#181b21', borderColor: 'rgba(255,255,255,0.15)', borderRadius: 8, fontSize: 12 }}
+              cursor={{ fill: 'rgb(var(--ink) / 0.032)' }}
+              contentStyle={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'rgb(var(--ink) / 0.120)', borderRadius: 8, fontSize: 12 }}
               formatter={(v) => [`${v} peer${Number(v) === 1 ? '' : 's'}`, 'Count']}
               labelFormatter={(l) => `Composite ${l}–${Number(l) + BIN}`}
             />

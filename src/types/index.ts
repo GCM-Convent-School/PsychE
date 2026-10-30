@@ -36,6 +36,74 @@ export interface Settings {
   school_name: string | null;       // V14 — branding, shown pre-login via PsychE_Public_Branding
   school_logo_url: string | null;   // V14 — public URL in the "branding" bucket
   accent_color: string | null;      // V14 — reserved for the Release 2 theme
+  // V16 — follow-up rhythm in days (admin-editable)
+  urgent_first_contact_days: number;
+  followup_days_urgent: number;
+  followup_days_support: number;
+  followup_days_watch: number;
+  post_closure_review_days: number;
+  routine_checkin_days: number;
+}
+
+// ---------------------------------------------------------------------------
+//  V16: Student journey (docs/designs/release3-journey-model.md)
+// ---------------------------------------------------------------------------
+
+export type NeedLevel = 'urgent' | 'support' | 'watch';
+export type CaseStatus = 'open' | 'closed';
+export type CaseSource = 'first_meeting' | 'teacher_referral' | 'counsellor' | 'review_check' | 'other';
+export type CaseOutcome = 'all_clear' | 'improved' | 'referred_out' | 'no_longer_needed' | 'parent_declined' | 'left_school';
+export type JourneyStage = 'not_seen' | 'open' | 'review_due' | 'regular';
+
+export interface Case {
+  id: string;
+  student_uuid: string;
+  status: CaseStatus;
+  need_level: NeedLevel | null;     // required while open
+  source: CaseSource;
+  opened_at: string;
+  closed_at: string | null;
+  closed_by: string | null;
+  outcome: CaseOutcome | null;      // required once closed
+  closure_note: string | null;
+  review_due_on: string | null;     // post-closure check deadline (date)
+  review_done_at: string | null;
+}
+
+export type ReferralCategory = 'behaviour' | 'emotional' | 'academic' | 'social' | 'attendance' | 'wellbeing' | 'other';
+export type ReferralStatus = 'new' | 'case_opened' | 'added_to_case' | 'no_action';
+
+export interface Referral {
+  id: string;
+  student_uuid: string;
+  referred_by: string;              // teacher's auth user id
+  category: ReferralCategory;
+  concern_level: 'concern' | 'serious';
+  observation: string;
+  observed_on: string;
+  status: ReferralStatus;
+  case_id: string | null;
+  reply_to_teacher: string | null;
+  handled_by: string | null;
+  handled_at: string | null;
+  created_at: string;
+}
+
+/** One row per student from the PsychE_Student_Journey view. */
+export interface StudentJourney {
+  student_uuid: string;
+  full_name: string;
+  student_id: string;
+  course: string | null;
+  stage: JourneyStage;
+  need_level: NeedLevel | null;
+  case_id: string | null;
+  case_opened_at: string | null;
+  last_session_at: string | null;
+  next_scheduled_on: string | null;
+  next_due_on: string | null;
+  overdue: boolean;
+  new_referrals: number;
 }
 
 export type AIProvider = 'groq' | 'gemini';

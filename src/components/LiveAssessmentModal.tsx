@@ -141,7 +141,7 @@ export const LiveAssessmentModal: React.FC<LiveAssessmentModalProps> = ({ studen
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         className="bento-card"
-        style={{ width: '100%', maxWidth: '700px', backgroundColor: 'var(--color-background)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column' }}
+        style={{ width: '100%', maxWidth: '700px', backgroundColor: 'var(--color-background)', border: '1px solid rgb(var(--ink) / 0.080)', display: 'flex', flexDirection: 'column' }}
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
@@ -190,7 +190,7 @@ export const LiveAssessmentModal: React.FC<LiveAssessmentModalProps> = ({ studen
                         padding: '1rem 0',
                         borderRadius: 'var(--radius-sm)',
                         border: currentScore === num ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                        backgroundColor: currentScore === num ? 'rgba(94, 106, 210, 0.15)' : 'rgba(255,255,255,0.02)',
+                        backgroundColor: currentScore === num ? 'rgba(94, 106, 210, 0.15)' : 'rgb(var(--ink) / 0.016)',
                         color: currentScore === num ? 'var(--color-primary)' : 'inherit',
                         fontSize: '1.1rem',
                         fontWeight: 600,
@@ -224,7 +224,7 @@ export const LiveAssessmentModal: React.FC<LiveAssessmentModalProps> = ({ studen
               onClick={handleSubmit}
               disabled={currentScore === undefined || saving}
               className="btn btn-primary"
-              style={{ padding: '0.75rem 1.5rem', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', opacity: (currentScore === undefined || saving) ? 0.5 : 1, transition: 'all 0.2s', display: 'flex', gap: '0.5rem', alignItems: 'center' }}
+              style={{ padding: '0.75rem 1.5rem', background: 'var(--accent-green)', border: 'none', opacity: (currentScore === undefined || saving) ? 0.5 : 1, transition: 'all 0.2s', display: 'flex', gap: '0.5rem', alignItems: 'center' }}
             >
               {saving ? 'Saving...' : <><CheckCircle size={18} /> Submit Assessment</>}
             </button>

@@ -172,7 +172,7 @@ export const AIModelSettings: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn btn-primary"
-              style={{ background: 'linear-gradient(135deg, var(--color-primary), #8b5cf6)', border: 'none', padding: '0.75rem 2rem' }}
+              style={{ background: 'var(--color-primary)', border: 'none', padding: '0.75rem 2rem' }}
             >
               {saving ? 'Saving...' : <><Save size={18} /> Save Models</>}
             </motion.button>

@@ -49,6 +49,7 @@ const KNOWN_TABLES = [
   'PsychE_Student_Telemetry', 'PsychE_Student_Notes', 'PsychE_AI_Reports',
   'PsychE_Sanitized_Session_Reports', 'PsychE_Model_Usage_Log', 'PsychE_Formalized_Sessions',
   'PsychE_Courses', 'PsychE_Staff', 'PsychE_Staff_Secrets', 'PsychE_Audit',
+  'PsychE_Cases', 'PsychE_Referrals', 'PsychE_Student_Journey',
 ];
 // Real argument names: PostgREST answers 404 for a signature mismatch even when
 // anon COULD execute the function, so a bare {} would pass for the wrong reason.
@@ -68,6 +69,8 @@ const KNOWN_FUNCTIONS = {
   psyche_has_student_access: {},
   psyche_is_admin: {},
   psyche_current_role: {},
+  psyche_teacher_find_students: { p_query: 'ab' },
+  psyche_teacher_my_referrals: {},
 };
 const PROTECTED_EDGE_FUNCTIONS = ['generate-ai-report', 'formalize-sessions', 'list-models'];
 
@@ -101,7 +104,9 @@ for (const t of tables) {
     `HTTP ${read.status}${read.status === 200 ? `, ${rows} row(s)` : ''}`);
 
   const write = await req(`/rest/v1/${t}`, { method: 'POST', body: '[]', headers: { Prefer: 'return=minimal' } });
-  record(DENIED.has(write.status), `write ${t}`, `HTTP ${write.status}${write.body?.code ? ` (${write.body.code})` : ''}`);
+  // 55000 = a view Postgres can't write through at all (e.g. the journey view).
+  record(DENIED.has(write.status) || write.body?.code === '55000', `write ${t}`,
+    `HTTP ${write.status}${write.body?.code ? ` (${write.body.code})` : ''}`);
 }
 
 for (const [fn, args] of Object.entries(KNOWN_FUNCTIONS)) {

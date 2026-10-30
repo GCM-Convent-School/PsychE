@@ -68,6 +68,19 @@ REVOKE ALL ON "PsychE_Staff_Secrets" FROM authenticated;
 CREATE POLICY psyche_audit_admin_read ON "PsychE_Audit" FOR SELECT TO authenticated
   USING (psyche_is_admin());
 
+-- Teacher referrals (V16): teachers send referrals and read their own. Step 1
+-- dropped these, so put them back whenever V16 has run.
+DO $$
+BEGIN
+  IF to_regclass('public."PsychE_Referrals"') IS NOT NULL THEN
+    CREATE POLICY psyche_referrals_teacher_insert ON "PsychE_Referrals" FOR INSERT TO authenticated
+      WITH CHECK (psyche_current_role() = 'teacher' AND referred_by = auth.uid() AND status = 'new'
+                  AND case_id IS NULL AND handled_by IS NULL AND reply_to_teacher IS NULL);
+    CREATE POLICY psyche_referrals_teacher_read ON "PsychE_Referrals" FOR SELECT TO authenticated
+      USING (psyche_current_role() = 'teacher' AND referred_by = auth.uid());
+  END IF;
+END $$;
+
 -- The one pre-login surface.
 GRANT SELECT ON "PsychE_Public_Branding" TO anon, authenticated;
 

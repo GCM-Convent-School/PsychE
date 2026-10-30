@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Search, Printer, ArrowLeft, CheckSquare, Square, Calendar, ChevronDown, ChevronUp, X, AlertTriangle } from 'lucide-react';
+import { Users, Search, Printer, ArrowLeft, ArrowUpRight, CheckSquare, Square, Calendar, ChevronDown, ChevronUp, X, AlertTriangle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { parseISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { getAvailableCapacityForDateRange, toLocalDateStr } from '../lib/capacity';
 import { getWeekdayName, isSunday } from '../utils/dateFormatter';
 import { useBranding, PRODUCT_NAME } from '../lib/branding';
+import { Avatar } from '../components/Avatar';
 
 const container = {
   hidden: { opacity: 0 },
@@ -306,7 +307,7 @@ export const StudentDirectory: React.FC = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6 mobile-stack mobile-stack-start" style={{ gap: '1rem' }}>
           <div>
-            <button onClick={() => navigate(-1)} className="btn btn-secondary mb-4" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none' }}>
+            <button onClick={() => navigate(-1)} aria-label="Back" className="btn btn-secondary mb-4 page-back" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', backgroundColor: 'transparent', border: 'none' }}>
               <ArrowLeft size={16} /> Back
             </button>
             <h1 className="text-h1" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -342,7 +343,7 @@ export const StudentDirectory: React.FC = () => {
               className="btn btn-primary"
               disabled={selectedIds.size === 0 || isPrinting}
               onClick={handleBulkPrint}
-              style={{ background: 'linear-gradient(135deg, var(--color-primary), #8b5cf6)', border: 'none' }}
+              style={{ background: 'var(--color-primary)', border: 'none' }}
             >
               <Printer size={18} /> {isPrinting ? 'Preparing...' : `Print Selected (${selectedIds.size})`}
             </motion.button>
@@ -392,7 +393,7 @@ export const StudentDirectory: React.FC = () => {
                       <p style={{
                         display: 'flex', alignItems: 'center', gap: '0.3rem',
                         fontSize: '0.8125rem', fontWeight: 600, marginBottom: '0.75rem',
-                        color: isSunday(schedStartDate) ? '#f87171' : 'var(--color-text-muted)'
+                        color: isSunday(schedStartDate) ? 'var(--accent-red)' : 'var(--color-text-muted)'
                       }}>
                         {isSunday(schedStartDate) && <AlertTriangle size={13} />}
                         {getWeekdayName(schedStartDate)}
@@ -411,14 +412,14 @@ export const StudentDirectory: React.FC = () => {
                       onClick={handleAutoSchedule}
                       whileHover={{ scale: schedSelectedIds.size === 0 ? 1 : 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 700, border: 'none', cursor: schedSelectedIds.size === 0 ? 'not-allowed' : 'pointer', background: schedSelectedIds.size === 0 ? 'rgba(94,106,210,0.2)' : 'linear-gradient(135deg, var(--color-primary), #8b5cf6)', color: schedSelectedIds.size === 0 ? 'rgba(255,255,255,0.3)' : 'white', transition: 'all 0.2s ease' }}
+                      style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 700, border: 'none', cursor: schedSelectedIds.size === 0 ? 'not-allowed' : 'pointer', background: schedSelectedIds.size === 0 ? 'rgba(94,106,210,0.2)' : 'var(--color-primary)', color: schedSelectedIds.size === 0 ? 'rgb(var(--ink) / 0.240)' : 'white', transition: 'all 0.2s ease' }}
                     >
                       {scheduling ? 'Scheduling…' : 'Auto-Distribute Sessions'}
                     </motion.button>
                   </div>
 
                   {/* Divider */}
-                  <div style={{ width: '1px', alignSelf: 'stretch', backgroundColor: 'rgba(255,255,255,0.07)', flexShrink: 0 }} />
+                  <div style={{ width: '1px', alignSelf: 'stretch', backgroundColor: 'rgb(var(--ink) / 0.056)', flexShrink: 0 }} />
 
                   {/* Student Table */}
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -433,7 +434,7 @@ export const StudentDirectory: React.FC = () => {
                         style={{ paddingLeft: '36px', fontSize: '0.875rem', padding: '0.5rem 0.875rem 0.5rem 36px' }}
                       />
                     </div>
-                    <div style={{ maxHeight: '280px', overflowY: 'auto', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ maxHeight: '280px', overflowY: 'auto', borderRadius: 'var(--radius-md)', border: '1px solid rgb(var(--ink) / 0.064)' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                         <colgroup>
                           <col style={{ width: '44px' }} />
@@ -442,7 +443,7 @@ export const StudentDirectory: React.FC = () => {
                           <col />
                         </colgroup>
                         <thead>
-                          <tr style={{ backgroundColor: 'rgba(0,0,0,0.25)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                          <tr style={{ backgroundColor: 'var(--bg-tertiary)', borderBottom: '1px solid rgb(var(--ink) / 0.064)' }}>
                             <th style={{ padding: '0.625rem 0.75rem', textAlign: 'center' }}>
                               <button onClick={schedToggleAll} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text)', display: 'flex', alignItems: 'center', margin: '0 auto' }}>
                                 {schedSelectedIds.size === schedFilteredStudents.length && schedFilteredStudents.length > 0
@@ -460,8 +461,8 @@ export const StudentDirectory: React.FC = () => {
                             <tr
                               key={student.id}
                               onClick={() => schedToggle(student.id)}
-                              style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: schedSelectedIds.has(student.id) ? 'rgba(94,106,210,0.08)' : 'transparent', cursor: 'pointer', transition: 'background-color 0.12s ease' }}
-                              onMouseEnter={e => { if (!schedSelectedIds.has(student.id)) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; }}
+                              style={{ borderBottom: '1px solid rgb(var(--ink) / 0.040)', backgroundColor: schedSelectedIds.has(student.id) ? 'rgba(94,106,210,0.08)' : 'transparent', cursor: 'pointer', transition: 'background-color 0.12s ease' }}
+                              onMouseEnter={e => { if (!schedSelectedIds.has(student.id)) e.currentTarget.style.backgroundColor = 'rgb(var(--ink) / 0.024)'; }}
                               onMouseLeave={e => { e.currentTarget.style.backgroundColor = schedSelectedIds.has(student.id) ? 'rgba(94,106,210,0.08)' : 'transparent'; }}
                             >
                               <td style={{ padding: '0.625rem 0.75rem', textAlign: 'center' }}>
@@ -533,7 +534,7 @@ export const StudentDirectory: React.FC = () => {
                 exit={{ opacity: 0, height: 0 }}
                 style={{ overflow: 'hidden' }}
               >
-                <div style={{ paddingTop: '1.25rem', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ paddingTop: '1.25rem', marginTop: '1rem', borderTop: '1px solid rgb(var(--ink) / 0.064)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <span style={{ fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Advanced Filters</span>
                     {(selectedCategory || selectedTagId || courseFilter || riskFilter || sessionDateFilter || searchQuery) && (
@@ -559,7 +560,7 @@ export const StudentDirectory: React.FC = () => {
                       className="input w-full"
                       value={selectedCategory}
                       onChange={e => { setSelectedCategory(e.target.value); setSelectedTagId(''); }}
-                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'var(--bg-tertiary)', border: '1px solid rgb(var(--ink) / 0.080)' }}
                     >
                       <option value="">All Categories</option>
                       {availableCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
@@ -571,7 +572,7 @@ export const StudentDirectory: React.FC = () => {
                       value={selectedTagId}
                       onChange={e => setSelectedTagId(e.target.value)}
                       disabled={!selectedCategory && systemTags.length > 0}
-                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'var(--bg-tertiary)', border: '1px solid rgb(var(--ink) / 0.080)' }}
                     >
                       <option value="">All Tags {selectedCategory ? `in ${selectedCategory}` : ''}</option>
                       {systemTags
@@ -584,7 +585,7 @@ export const StudentDirectory: React.FC = () => {
                       className="input w-full"
                       value={courseFilter}
                       onChange={e => setCourseFilter(e.target.value)}
-                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'var(--bg-tertiary)', border: '1px solid rgb(var(--ink) / 0.080)' }}
                     >
                       <option value="">All Courses</option>
                       {availableCourses.map(course => <option key={course} value={course as string}>{course as string}</option>)}
@@ -595,7 +596,7 @@ export const StudentDirectory: React.FC = () => {
                       className="input w-full"
                       value={riskFilter}
                       onChange={e => setRiskFilter(e.target.value)}
-                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'var(--bg-tertiary)', border: '1px solid rgb(var(--ink) / 0.080)' }}
                     >
                       <option value="">All Risk Levels</option>
                       <option value="Low">Low</option>
@@ -609,7 +610,7 @@ export const StudentDirectory: React.FC = () => {
                       className="input w-full"
                       value={sessionDateFilter}
                       onChange={e => setSessionDateFilter(e.target.value)}
-                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      style={{ height: '2.75rem', padding: '0 0.75rem', fontSize: '0.875rem', backgroundColor: 'var(--bg-tertiary)', border: '1px solid rgb(var(--ink) / 0.080)' }}
                     >
                       <option value="">Session: All Time</option>
                       <option value="Recent (Last 7 Days)">Recent (Last 7 Days)</option>
@@ -637,27 +638,29 @@ export const StudentDirectory: React.FC = () => {
                   <col className="col-course" />
                   <col className="col-risk" style={{ width: '100px' }} />
                   <col className="col-enrolled" style={{ width: '110px' }} />
+                  <col className="col-actions" style={{ width: '104px' }} />
                 </colgroup>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: 'rgba(0,0,0,0.15)' }}>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: 'var(--bg-tertiary)' }}>
                     <th style={{ padding: '1rem 0.75rem', textAlign: 'center' }}>
                       <button onClick={toggleSelectAll} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text)', display: 'flex', alignItems: 'center', margin: '0 auto' }}>
                         {selectedIds.size === filteredStudents.length && filteredStudents.length > 0 ? <CheckSquare size={20} style={{ color: 'var(--color-primary)' }} /> : <Square size={20} />}
                       </button>
                     </th>
-                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Student Name</th>
-                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>ID</th>
-                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Course</th>
-                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Risk</th>
-                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Enrolled</th>
+                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Student Name</th>
+                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>ID</th>
+                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Course</th>
+                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Risk</th>
+                    <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Enrolled</th>
+                    <th style={{ padding: '1rem 0.75rem' }}><span className="sr-only">Quick actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredStudents.map(student => (
                     <tr
                       key={student.id}
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: selectedIds.has(student.id) ? 'rgba(94,106,210,0.05)' : 'transparent', transition: 'background-color 0.15s ease' }}
-                      onMouseEnter={e => { if (!selectedIds.has(student.id)) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; }}
+                      style={{ borderBottom: '1px solid rgb(var(--ink) / 0.040)', backgroundColor: selectedIds.has(student.id) ? 'rgba(94,106,210,0.05)' : 'transparent', transition: 'background-color 0.15s ease' }}
+                      onMouseEnter={e => { if (!selectedIds.has(student.id)) e.currentTarget.style.backgroundColor = 'rgb(var(--ink) / 0.024)'; }}
                       onMouseLeave={e => { e.currentTarget.style.backgroundColor = selectedIds.has(student.id) ? 'rgba(94,106,210,0.05)' : 'transparent'; }}
                     >
                       <td style={{ padding: '1rem 0.75rem', textAlign: 'center' }}>
@@ -666,31 +669,36 @@ export const StudentDirectory: React.FC = () => {
                         </button>
                       </td>
                       <td style={{ padding: '1rem 0.75rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        <span onClick={() => navigate(`/student/${student.student_id || student.id}`)} style={{ cursor: 'pointer', color: 'var(--color-text)' }}
-                          onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-primary)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text)'; }}>
-                          {student.full_name}
-                        </span>
+                        <button type="button" onClick={() => navigate(`/student/${student.student_id || student.id}`)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 10, maxWidth: '100%', color: 'var(--color-text)', fontWeight: 700, textAlign: 'left' }}>
+                          <Avatar name={student.full_name} />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{student.full_name}</span>
+                        </button>
                       </td>
                       <td style={{ padding: '1rem 0.75rem', color: 'var(--color-text-muted)', fontFamily: 'monospace', fontSize: '0.875rem' }}>{student.student_id}</td>
                       <td style={{ padding: '1rem 0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{student.course}</td>
                       <td style={{ padding: '1rem 0.75rem' }}>
-                        <span style={{
-                          fontSize: '0.6875rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700,
-                          backgroundColor: student.risk_level === 'High' ? 'rgba(239,68,68,0.1)' : student.risk_level === 'Medium' ? 'rgba(245,158,11,0.1)' : 'rgba(74,222,128,0.1)',
-                          color: student.risk_level === 'High' ? '#ef4444' : student.risk_level === 'Medium' ? '#f59e0b' : '#4ade80'
-                        }}>
+                        <span className={`chip ${student.risk_level === 'High' ? 'chip--urgent' : student.risk_level === 'Medium' ? 'chip--support' : 'chip--good'}`}>
                           {student.risk_level || 'Low'}
                         </span>
                       </td>
                       <td style={{ padding: '1rem 0.75rem', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                         {student.enrolled_date ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(parseISO(student.enrolled_date)) : 'N/A'}
                       </td>
+                      {/* Act on the row without opening the profile. */}
+                      <td style={{ padding: '0.5rem 0.75rem' }}>
+                        <span style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                          <button type="button" className="round round--sm" data-tip="Log session" aria-label={`Log a session for ${student.full_name}`}
+                            onClick={() => navigate(`/add-log?student=${student.id}`)}><Plus size={14} /></button>
+                          <button type="button" className="round round--sm" data-tip="Open" aria-label={`Open ${student.full_name}`}
+                            onClick={() => navigate(`/student/${student.student_id || student.id}`)}><ArrowUpRight size={14} /></button>
+                        </span>
+                      </td>
                     </tr>
                   ))}
                   {filteredStudents.length === 0 && (
                     <tr>
-                      <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No students match your filter.</td>
+                      <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No students match your filter.</td>
                     </tr>
                   )}
                 </tbody>
