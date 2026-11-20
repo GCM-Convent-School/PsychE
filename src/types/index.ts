@@ -2,7 +2,7 @@
 //  PsychE V3.0 — TypeScript Interfaces
 //  Single source of truth for all entity shapes.
 //  Mirrors PsychE_ Supabase tables 1:1.
-//  Generated from: docs/ARCH_technical-specs.md + Master Schema/psyche_v3_master_schema.sql
+//  Generated from: docs/ARCH_technical-specs.md + database/archive/psyche_v3_master_schema.sql
 // =============================================================================
 
 // ---------------------------------------------------------------------------
@@ -427,7 +427,7 @@ export interface RsiData {
 /**
  * V7.1 — minimum CF_C for Composite Score to be shown as a primary number,
  * and for a student to be eligible for RSI ranking. Must stay in sync with
- * `c_min_confidence` in v7_1_confidence_gating.sql.
+ * `c_min_confidence` in v07_1_confidence_gating.sql.
  */
 export const MIN_COMPOSITE_CONFIDENCE = 0.5;
 

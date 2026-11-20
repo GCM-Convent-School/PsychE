@@ -6,7 +6,7 @@
 
 ## 1. Database Schema — V3.0 (Canonical)
 
-Schema file: `Master Schema/psyche_v3_master_schema.sql` — this is the single source of truth. The tables below are the authoritative reference for all Supabase queries written in application code.
+Schema file: `database/install.sql` — this is the single source of truth (`database/archive/psyche_v3_master_schema.sql` is the historical V3 file). The tables below are the authoritative reference for all Supabase queries written in application code.
 
 ### Dependency Tiers
 
@@ -28,7 +28,7 @@ TIER 3 (Multiple FKs)
   PsychE_Responses       → PsychE_Counseling_Logs(id) + PsychE_Questions(id)
 ```
 
-> **Schema location caveat:** `PsychE_Domains`, `PsychE_Student_Telemetry`, and the `domain_code`/`domain_weight`/`scale_min`/`scale_max` columns on `PsychE_Modules` were introduced by `v5_migration.sql`, `v5_analytics_migration.sql`, and `v6_domain_scoring_engine.sql` at the repo root — they are **not yet merged** into `Master Schema/psyche_v3_master_schema.sql`. Until a formal merge is approved, treat all four files together as the canonical schema.
+> **Schema location caveat:** `PsychE_Domains`, `PsychE_Student_Telemetry`, and the `domain_code`/`domain_weight`/`scale_min`/`scale_max` columns on `PsychE_Modules` were introduced by `v05_migration.sql`, `v05_analytics_migration.sql`, and `v06_domain_scoring_engine.sql` at the repo root — they are **not yet merged** into `database/archive/psyche_v3_master_schema.sql`. Until a formal merge is approved, treat all four files together as the canonical schema.
 
 ---
 
@@ -365,9 +365,9 @@ import { supabase } from '../lib/supabase';
 
 > Multiple scoring engines write into the same `PsychE_Student_Telemetry` row per student per day. All are pure SQL (`plpgsql` functions). Domain Scoring (§8.1) is triggered client-side on assessment submission; everything else — Cold-Start Gatekeeper, ETI, Composite Score, RSI — runs inside `psyche_run_daily_batch()`, invoked nightly by the GitHub Actions cron in `.github/workflows/daily_analytics.yml` (21:30 UTC / 03:00 IST, `workflow_dispatch` also available for manual runs). No client-side recomputation exists for these — the frontend only reads the latest row.
 
-### 8.1 Domain Scoring Engine (V6 rewrite — `calculate_student_telemetry`, `v6_domain_scoring_engine.sql`)
+### 8.1 Domain Scoring Engine (V6 rewrite — `calculate_student_telemetry`, `v06_domain_scoring_engine.sql`)
 
-> Formal model: a **second-order (hierarchical) factor model** — the same architecture underlying instruments like the WISC (subtests → index scores → full-scale IQ). Designed with an external psychometrics consultant; superseded the V5.0 prototype in `v5_migration.sql`, which flattened all responses directly into a domain average and could not support a second instrument type. See conversation history for the full consultant rationale — this section documents the shipped implementation.
+> Formal model: a **second-order (hierarchical) factor model** — the same architecture underlying instruments like the WISC (subtests → index scores → full-scale IQ). Designed with an external psychometrics consultant; superseded the V5.0 prototype in `v05_migration.sql`, which flattened all responses directly into a domain average and could not support a second instrument type. See conversation history for the full consultant rationale — this section documents the shipped implementation.
 
 Scores counseling activity from the trailing **90-day window**, in three explicit stages:
 
@@ -399,7 +399,7 @@ Scores counseling activity from the trailing **90-day window**, in three explici
 
 Result stored in `PsychE_Student_Telemetry.metrics_payload` (shape: `TelemetryPayload` in `src/types/index.ts`).
 
-### 8.2 Cold-Start Gatekeeper (`psyche_get_engine_status`, `v5_analytics_migration.sql`)
+### 8.2 Cold-Start Gatekeeper (`psyche_get_engine_status`, `v05_analytics_migration.sql`)
 Determines `engine_status` — gates whether ETI/domain data is trustworthy enough to show:
 
 | State | Condition |
@@ -412,7 +412,7 @@ Determines `engine_status` — gates whether ETI/domain data is trustworthy enou
 
 `confidence_multiplier` (`src/analytics/ColdStart.ts` → `calculateConfidenceMultiplier`) is a **frontend-only** display ramp, not stored by the SQL engine: `min(1, daysSinceFirst / 15) * min(1, completedSessions / 3)`. Used to show a "Building profile — N% Confidence" badge during `warming`.
 
-### 8.3 ETI Engine (`psyche_calculate_eti`, `v5_analytics_migration.sql`)
+### 8.3 ETI Engine (`psyche_calculate_eti`, `v05_analytics_migration.sql`)
 Engagement Trajectory Index — scores the trailing `p_window_days` (default 30) of `PsychE_Counseling_Logs` for one student:
 - `A` (attendance ratio) = `Completed / (Completed + No_Show)`
 - `F` (follow-through) = `1 - (Pending follow-ups / total logs in window)`
@@ -430,12 +430,12 @@ Because both passes execute inside the same function call, they share one transa
 
 This cron does **not** call §8.1's `calculate_student_telemetry` — that RPC is instead triggered client-side, synchronously, from `AssessmentWizard.tsx` right after a completed assessment's responses are inserted. Net effect: domain scores update the instant a counselor finishes scoring a student; `engine_status`/ETI/Composite Score/RSI all update once nightly.
 
-### 8.5 Cross-Engine Upsert Fix (V6.1 — `v6_1_telemetry_upsert_fix.sql`)
+### 8.5 Cross-Engine Upsert Fix (V6.1 — `v06_1_telemetry_upsert_fix.sql`)
 Both engines above write the **same row** (keyed on `student_uuid` + calendar day), and each `UPDATE` branch correctly touches only its own columns. But each `INSERT` branch (taken when no row exists yet for that student today) originally set **only its own columns**, leaving the other engine's columns `NULL` on the new row. Whichever engine ran first each day "won" the `INSERT`; in production the nightly cron always ran before same-day assessments, so this stayed latent until `calculate_student_telemetry()` was invoked manually (V6 backfill) on students with no row yet for the day — which silently zeroed their `engine_status`/`eti_score`/`eti_data` for that day.
 
-**Fix:** both functions now look up the student's most recent prior row (any day, via `ORDER BY calculated_at DESC LIMIT 1`) before an `INSERT`, and carry the *other* engine's last-known values forward instead of leaving them `NULL`. A metric that has genuinely never been computed for a student (e.g. true cold-start) still correctly stays `NULL` — carry-forward only ever copies a value that existed before. Superseded, not appended: `v6_1_telemetry_upsert_fix.sql` reissues `CREATE OR REPLACE` for both functions; their scoring math is unchanged.
+**Fix:** both functions now look up the student's most recent prior row (any day, via `ORDER BY calculated_at DESC LIMIT 1`) before an `INSERT`, and carry the *other* engine's last-known values forward instead of leaving them `NULL`. A metric that has genuinely never been computed for a student (e.g. true cold-start) still correctly stays `NULL` — carry-forward only ever copies a value that existed before. Superseded, not appended: `v06_1_telemetry_upsert_fix.sql` reissues `CREATE OR REPLACE` for both functions; their scoring math is unchanged.
 
-### 8.6 Composite Score (V7 — `psyche_compute_composite_score`, `v7_composite_rsi_engine.sql`)
+### 8.6 Composite Score (V7 — `psyche_compute_composite_score`, `v07_composite_rsi_engine.sql`)
 
 > Designed with the same external psychometrics consultant as §8.1. Originally specified with a fifth term (Relative Deficit, derived from RSI) — caught as a genuine circular dependency during design (Composite Score would need RSI, RSI needs Composite Score) and resolved by removing that term entirely. Composite Score is now **strictly self-contained per student**, with zero dependency on any other student's data — this is what makes it safe to compute in Pass 1, independently, before RSI (Pass 2) ranks the results.
 
@@ -460,11 +460,11 @@ Resolution is a gate on confidence, **not** on the formula — the math is struc
 - `CF_C ≥ 0.5` (≥ 2 of 4 components) → display `C` as a primary number with its load band.
 - `CF_C < 0.5` → display **"Insufficient Assessment Data"** instead. The sub-component breakdown is still shown for context.
 - `composite_score` is **still computed and stored unchanged at any confidence** — only presentation is gated (frontend) and RSI eligibility is gated (§8.7). Lowering the threshold later needs no recomputation.
-- Threshold lives in two places that must stay in sync: `MIN_COMPOSITE_CONFIDENCE` (`src/types/index.ts`) and `c_min_confidence` (`v7_1_confidence_gating.sql`).
+- Threshold lives in two places that must stay in sync: `MIN_COMPOSITE_CONFIDENCE` (`src/types/index.ts`) and `c_min_confidence` (`v07_1_confidence_gating.sql`).
 
 **Thresholds (UI):** 0–25 Low Load · 26–50 Moderate Load · 51–75 Elevated Load · 76–100 High Load.
 
-### 8.7 RSI — Relative Scoring Index (V7 — `psyche_compute_rsi_for_student`, `v7_composite_rsi_engine.sql`)
+### 8.7 RSI — Relative Scoring Index (V7 — `psyche_compute_rsi_for_student`, `v07_composite_rsi_engine.sql`)
 
 Norm-referenced percentile rank of Composite Score within a cohort — the only metric in the entire stack that is explicitly comparative (meaningless in isolation, only relative to a defined peer group). Strictly downstream of §8.6: reads already-committed `composite_score` values, never contributes to them.
 

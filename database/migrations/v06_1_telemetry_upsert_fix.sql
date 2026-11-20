@@ -26,7 +26,7 @@
 --  genuinely existed before.
 --
 --  Idempotent (CREATE OR REPLACE). Supersedes the UPSERT logic in both
---  v6_domain_scoring_engine.sql and v5_analytics_migration.sql; does not
+--  v06_domain_scoring_engine.sql and v05_analytics_migration.sql; does not
 --  change either engine's actual scoring math.
 -- =============================================================================
 

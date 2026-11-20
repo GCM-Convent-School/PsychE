@@ -6,7 +6,7 @@
 --  Paste into the Supabase SQL editor and run. Idempotent — running it twice
 --  changes nothing, and it contains no DROP or DELETE.
 --
---  Already folded into schema/install.sql for fresh installs. This standalone
+--  Already folded into database/install.sql for fresh installs. This standalone
 --  file exists so an EXISTING database can be upgraded without re-running the
 --  full installer.
 --

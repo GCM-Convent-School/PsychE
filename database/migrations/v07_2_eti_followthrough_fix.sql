@@ -29,11 +29,11 @@
 --  'Done'/'Cancelled' remain excluded exactly as before, and the denominator
 --  stays total logs in window per the original ETI specification. This change
 --  only stops counting obligations that were never created. It is a byte-for-
---  byte copy of the v5_analytics_migration.sql definition with that single
+--  byte copy of the v05_analytics_migration.sql definition with that single
 --  FILTER clause amended — no other behaviour is altered.
 --
 --  No schema change; function replacement only. Run AFTER
---  v5_analytics_migration.sql. Independent of v6/v7 — touches neither domain
+--  v05_analytics_migration.sql. Independent of v6/v7 — touches neither domain
 --  scoring nor the composite/RSI functions.
 --
 --  AFTER RUNNING: execute  SELECT psyche_run_daily_batch();  so stored

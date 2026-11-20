@@ -12,19 +12,19 @@
 --  Running it against a populated database ADDS anything missing and refreshes
 --  the engine functions — it does not drop, truncate, or overwrite student data.
 --
---  ⚠ NOTE: `Master Schema/psyche_v3_master_schema.sql` (the older file this one
+--  ⚠ NOTE: `database/archive/psyche_v3_master_schema.sql` (the older file this one
 --    supersedes) opens with DROP TABLE ... CASCADE on all eight tables. That is
 --    a destructive reset. This installer deliberately contains no DROP TABLE.
 --    If you genuinely want a clean wipe, use that file knowingly instead.
 --
 --  ── WHAT THIS REPLACES ─────────────────────────────────────────────────────
 --  Supersedes running this chain in order:
---      Master Schema/psyche_v3_master_schema.sql
---      v5_migration.sql            v5_analytics_migration.sql
---      v6_domain_scoring_engine.sql        v6_1_telemetry_upsert_fix.sql
---      v7_composite_rsi_engine.sql         v7_1_confidence_gating.sql
---      v7_2_eti_followthrough_fix.sql      v7_3_followup_autoclose.sql
---      v8_programme_health.sql
+--      database/archive/psyche_v3_master_schema.sql
+--      v05_migration.sql            v05_analytics_migration.sql
+--      v06_domain_scoring_engine.sql        v06_1_telemetry_upsert_fix.sql
+--      v07_composite_rsi_engine.sql         v07_1_confidence_gating.sql
+--      v07_2_eti_followthrough_fix.sql      v07_3_followup_autoclose.sql
+--      v08_programme_health.sql
 --  Those files remain in the repository as historical record — several document
 --  real bugs and their fixes, and the reasoning is worth keeping.
 --
@@ -1078,7 +1078,7 @@ $$;
 --  reaching n >= 8 wins. Only students clearing the confidence floor are
 --  ranked OR counted — a percentile is meaningless if the values being
 --  compared rest on unequal evidence.
---  (Final version — supersedes the one in v7_composite_rsi_engine.sql.)
+--  (Final version — supersedes the one in v07_composite_rsi_engine.sql.)
 CREATE OR REPLACE FUNCTION psyche_compute_rsi_for_student(p_student_uuid UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -1158,7 +1158,7 @@ $$;
 --  On INSERT it carries forward the ETI engine's columns from the most recent
 --  prior row: both engines share one row per student per day, and whichever
 --  inserts first would otherwise null the other's work.
---  (Final version — supersedes v5_migration.sql and v6_domain_scoring_engine.sql.)
+--  (Final version — supersedes v05_migration.sql and v06_domain_scoring_engine.sql.)
 CREATE OR REPLACE FUNCTION calculate_student_telemetry(target_student_uuid UUID)
 RETURNS JSONB
 LANGUAGE plpgsql

@@ -3,7 +3,7 @@
 --  Single-file, blank-slate execution script.
 --
 --  Compilation source: setup_database.sql, update_schema_files/v2–v12,
---    add_keywords_to_modules_v14.sql, schema_update_cms.sql, fix_rls.sql,
+--    add_keywords_to_modules_v14.sql, schema_update_cms.sql, database/archive/fix_rls.sql,
 --    drop_legacy_v2_tables.sql, update_schema.sql
 --
 --  Execution order follows strict foreign-key dependency tiers so this

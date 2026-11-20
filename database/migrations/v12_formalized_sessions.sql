@@ -6,7 +6,7 @@
 --  Paste into the Supabase SQL editor and run. Idempotent — running it twice
 --  changes nothing, and it contains no DROP or DELETE.
 --
---  Already folded into schema/install.sql (v6.5.0) for fresh installs. This
+--  Already folded into database/install.sql (v6.5.0) for fresh installs. This
 --  standalone file exists so an EXISTING database can be upgraded without
 --  re-running the full installer.
 --
@@ -16,7 +16,7 @@
 --    formalized entry by entry, not a re-written essay. That table is NOT
 --    dropped (this schema never drops tables) but is no longer read or
 --    written by the app; see the comment above its definition in
---    schema/install.sql.
+--    database/install.sql.
 --
 --  ⚠ SCOPE: "Formal" here means the raw timeline with reason /
 --    student_response / recommended_action rewritten in formal clinical

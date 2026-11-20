@@ -13,7 +13,7 @@ The plan is in `docs/PLAN_ui-ux-upgrade.md`; the design is in `docs/designs/sell
 | Staff, work codes, branding, audit (additive, safe any time) | `v14_staff_auth.sql` |
 | Anonymous access removed (maintenance window only) | `v15_rls_lockdown.sql` |
 | Emergency undo of V15 | `v15_rollback.sql` |
-| Fresh installs get both | `schema/install.sql` (Sections 5 and 7.5) |
+| Fresh installs get both | `database/install.sql` (Sections 5 and 7.5) |
 | Sign-in / code sending | `supabase/functions/staff-login`, `supabase/functions/send-work-code` |
 | Caller checks (staff session or cron service key, anon → 401) | `generate-ai-report`, `formalize-sessions`, `list-models` (admin only) |
 | Proof | `node scripts/anon-probe.mjs <env file>` |
@@ -137,7 +137,7 @@ No data is deleted by any step. Re-run V15 once it's fixed. The old PIN app stil
 
 ## D. New school (clone)
 
-1. Create a new Supabase project. Run `schema/install.sql` (it includes V14 and V15).
+1. Create a new Supabase project. Run `database/install.sql` (it includes V14 and V15).
 2. Do the secrets, dashboard settings and function deploy (above), with that school's notify gateway and domain.
 3. Seed its admin and school name.
 4. Create a new Coolify app from this repo with that project's `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
@@ -155,4 +155,4 @@ No data is deleted by any step. Re-run V15 once it's fixed. The old PIN app stil
 - A 4-digit code has 10,000 values. The cooldown slows guessing to about 20 tries an hour per number, so someone who knows a staff mobile number would need around 10 days on average. The audit table records every failed attempt (`login_failed`). Watch for runs of them.
 - Opening a student record is not audited yet (P8, TODOS.md). Creates, edits, deletes and logins are.
 - Rows written before Release 1 have `created_by = NULL`; treat them as "pre-auth (shared PIN)".
-- `webhook.js` stops working after V15. It was left as is on purpose (D9). Don't re-enable it with the service-role key without its own caller check.
+- `server/webhook.js` stops working after V15. It was left as is on purpose (D9). Don't re-enable it with the service-role key without its own caller check.

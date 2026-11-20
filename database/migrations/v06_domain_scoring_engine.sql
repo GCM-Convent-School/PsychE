@@ -17,7 +17,7 @@
 --  clinically-motivated axes, plus a dominant-tension (T*) summary.
 --
 --  Idempotent. Supersedes the domain-scoring portion of calculate_student_telemetry()
---  from v5_migration.sql. Does NOT touch the ETI engine (v5_analytics_migration.sql)
+--  from v05_migration.sql. Does NOT touch the ETI engine (v05_analytics_migration.sql)
 --  or PsychE_Student_Telemetry's engine_status/eti_* columns.
 -- =============================================================================
 
@@ -104,7 +104,7 @@ $$;
 --    Domain scoring now delegates to psyche_compute_domain_score(). Tension
 --    matrix expanded to 4 named axes + dominant tension. Archetype logic,
 --    data_completeness, and session_count/cold-start handling are UNCHANGED
---    from v5_migration.sql — the wellness-direction storage convention and
+--    from v05_migration.sql — the wellness-direction storage convention and
 --    thresholds still apply exactly as before.
 -- -----------------------------------------------------------------------------
 
@@ -138,7 +138,7 @@ DECLARE
     v_active_domain_cnt  INT := 0;
     v_payload            JSONB;
 BEGIN
-    -- 1. Session count in 90-day window (unchanged from v5_migration.sql)
+    -- 1. Session count in 90-day window (unchanged from v05_migration.sql)
     SELECT COUNT(DISTINCT l.id)
     INTO v_session_count
     FROM "PsychE_Counseling_Logs" l
@@ -216,7 +216,7 @@ BEGIN
 
         v_data_completeness := ROUND(v_active_domain_cnt::NUMERIC / 7.0, 4);
 
-        -- 7. Archetype Determination — UNCHANGED from v5_migration.sql (same
+        -- 7. Archetype Determination — UNCHANGED from v05_migration.sql (same
         --    thresholds/priority order; wellness-direction convention preserved)
         IF v_active_domain_cnt = 0 THEN
             v_archetype := 'Pending Baseline Assessment';

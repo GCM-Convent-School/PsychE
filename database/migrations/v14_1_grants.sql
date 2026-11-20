@@ -8,7 +8,7 @@
 --  "Your access is not active".
 --
 --  Safe to run any time, and more than once. v14_staff_auth.sql and
---  schema/install.sql now include these lines, so new clones don't need it.
+--  database/install.sql now include these lines, so new clones don't need it.
 -- =============================================================================
 
 REVOKE ALL ON "PsychE_Staff" FROM anon;

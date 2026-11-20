@@ -59,23 +59,23 @@
 
 ---
 
-### `Master Schema/psyche_v3_master_schema.sql`
+### `database/archive/psyche_v3_master_schema.sql`
 | Attribute | Value |
 |---|---|
-| **Path** | `/Master Schema/psyche_v3_master_schema.sql` |
+| **Path** | `database/archive/psyche_v3_master_schema.sql` |
 | **Load Trigger** | When verifying exact column types, constraints, or index definitions; when running schema migrations; when seeding a blank Supabase project |
 | **Owns** | Executable, canonical DDL for the original 8 tables, RLS policies, indexes, and baseline seed data. |
 | **Must NOT Contain** | Application logic, UI code |
 | **Do NOT modify** unless a formal schema migration is approved by the human |
 | **Last Updated** | Compiled from v2–v14 migration chain (see file header comments) |
-| **⚠ Not fully canonical since V5:** `PsychE_Domains`, `PsychE_Student_Telemetry`, and `Modules.domain_code`/`domain_weight` were added by `v5_migration.sql` and are not reflected here. See the two files below. |
+| **⚠ Not fully canonical since V5:** `PsychE_Domains`, `PsychE_Student_Telemetry`, and `Modules.domain_code`/`domain_weight` were added by `v05_migration.sql` and are not reflected here. See the two files below. |
 
 ---
 
-### `v5_migration.sql`
+### `v05_migration.sql`
 | Attribute | Value |
 |---|---|
-| **Path** | `/v5_migration.sql` (root) |
+| **Path** | `/database/migrations/v05_migration.sql` |
 | **Load Trigger** | When touching `PsychE_Domains`, `PsychE_Student_Telemetry`, `Modules.domain_code`/`domain_weight`, or the Domain Scoring Engine |
 | **Owns** | Idempotent DDL for `PsychE_Domains` (+ seed data) and `PsychE_Student_Telemetry`, RLS policies for both, and `calculate_student_telemetry()` (Domain Scoring Engine — see `ARCH_technical-specs.md` §8.1) |
 | **Must NOT Contain** | Application/UI code |
@@ -84,10 +84,10 @@
 
 ---
 
-### `v5_analytics_migration.sql`
+### `v05_analytics_migration.sql`
 | Attribute | Value |
 |---|---|
-| **Path** | `/v5_analytics_migration.sql` (root) |
+| **Path** | `/database/migrations/v05_analytics_migration.sql` |
 | **Load Trigger** | When touching `engine_status`, `eti_score`/`eti_data`, or the Cold-Start Gatekeeper / ETI Engine / daily batch cron |
 | **Owns** | DDL adding `engine_status`/`confidence_multiplier`/`eti_score`/`eti_data` columns to `PsychE_Student_Telemetry`, plus `psyche_get_engine_status()`, `psyche_calculate_eti()`, `psyche_run_daily_batch()` (see `ARCH_technical-specs.md` §8.2–§8.4) |
 | **Must NOT Contain** | Application/UI code |
@@ -107,55 +107,55 @@
 
 ---
 
-### `v6_domain_scoring_engine.sql`
+### `v06_domain_scoring_engine.sql`
 | Attribute | Value |
 |---|---|
-| **Path** | `/v6_domain_scoring_engine.sql` (root) |
+| **Path** | `/database/migrations/v06_domain_scoring_engine.sql` |
 | **Load Trigger** | When touching the Domain Scoring Engine, `PsychE_Modules.scale_min`/`scale_max`/`domain_weight`, or the Tension Matrix |
-| **Owns** | `ALTER TABLE "PsychE_Modules"` adding `scale_min`/`scale_max`; `psyche_compute_domain_score()` helper (the item→module→domain hierarchy); the rewritten `calculate_student_telemetry()` (`CREATE OR REPLACE`, same function name/signature as `v5_migration.sql`'s version — **supersedes it in place**, does not run alongside it) |
+| **Owns** | `ALTER TABLE "PsychE_Modules"` adding `scale_min`/`scale_max`; `psyche_compute_domain_score()` helper (the item→module→domain hierarchy); the rewritten `calculate_student_telemetry()` (`CREATE OR REPLACE`, same function name/signature as `v05_migration.sql`'s version — **supersedes it in place**, does not run alongside it) |
 | **Must NOT Contain** | Application/UI code |
 | **Do NOT modify** unless a formal schema migration is approved by the human |
-| **Status** | ✅ Run against dev Supabase 2026-07-28. Superseded in part by `v6_1_telemetry_upsert_fix.sql` (its `INSERT` branch had a cross-engine data-loss bug — see `ARCH_technical-specs.md` §8.5). |
+| **Status** | ✅ Run against dev Supabase 2026-07-28. Superseded in part by `v06_1_telemetry_upsert_fix.sql` (its `INSERT` branch had a cross-engine data-loss bug — see `ARCH_technical-specs.md` §8.5). |
 | **Last Updated** | 2026-07-28 (V6 domain scoring rewrite, per external psychometrics consultant spec) |
 
 ---
 
-### `v6_1_telemetry_upsert_fix.sql`
+### `v06_1_telemetry_upsert_fix.sql`
 | Attribute | Value |
 |---|---|
-| **Path** | `/v6_1_telemetry_upsert_fix.sql` (root) |
+| **Path** | `/database/migrations/v06_1_telemetry_upsert_fix.sql` |
 | **Load Trigger** | When touching either telemetry-writing function's `INSERT` branch, or debugging why `engine_status`/`eti_score` or `metrics_payload` is unexpectedly `NULL` on a fresh row |
-| **Owns** | `CREATE OR REPLACE` for `calculate_student_telemetry()` and `psyche_run_daily_batch()` — same scoring math as `v6_domain_scoring_engine.sql`/`v5_analytics_migration.sql`, fixes only the `INSERT` branch of each to carry forward the *other* engine's last-known values instead of nulling them. See `ARCH_technical-specs.md` §8.5 for the full bug writeup. |
+| **Owns** | `CREATE OR REPLACE` for `calculate_student_telemetry()` and `psyche_run_daily_batch()` — same scoring math as `v06_domain_scoring_engine.sql`/`v05_analytics_migration.sql`, fixes only the `INSERT` branch of each to carry forward the *other* engine's last-known values instead of nulling them. See `ARCH_technical-specs.md` §8.5 for the full bug writeup. |
 | **Must NOT Contain** | Application/UI code |
 | **Do NOT modify** unless a formal schema migration is approved by the human |
-| **Status** | ✅ Run against production Supabase 2026-07-28 (confirmed by the human), alongside `v6_domain_scoring_engine.sql`. Its `psyche_run_daily_batch()` definition is superseded by `v7_composite_rsi_engine.sql`; its `calculate_student_telemetry()` carry-forward fix remains the live version and is **not** re-issued by V7. |
+| **Status** | ✅ Run against production Supabase 2026-07-28 (confirmed by the human), alongside `v06_domain_scoring_engine.sql`. Its `psyche_run_daily_batch()` definition is superseded by `v07_composite_rsi_engine.sql`; its `calculate_student_telemetry()` carry-forward fix remains the live version and is **not** re-issued by V7. |
 | **Last Updated** | 2026-07-28 (bug found and fixed same-session as the V6 backfill) |
 
 ---
 
-### `v7_composite_rsi_engine.sql`
+### `v07_composite_rsi_engine.sql`
 | Attribute | Value |
 |---|---|
-| **Path** | `/v7_composite_rsi_engine.sql` (root) |
+| **Path** | `/database/migrations/v07_composite_rsi_engine.sql` |
 | **Load Trigger** | When touching Composite Score or RSI — their formulas, weights, cohort logic, or the two-pass cron structure |
 | **Owns** | `ALTER TABLE "PsychE_Student_Telemetry"` adding `composite_score`/`composite_confidence`/`composite_data`/`rsi_score`/`rsi_data`; `psyche_compute_composite_score()` (pure, per-student, §8.6); `psyche_compute_rsi_for_student()` (cohort percentile with course→grade→school fallback, §8.7); and a `CREATE OR REPLACE` of `psyche_run_daily_batch()` restructured into two passes |
 | **Must NOT Contain** | Application/UI code |
 | **Do NOT modify** unless a formal schema migration is approved by the human |
-| **⚠ Run order** | Must run **after** `v6_domain_scoring_engine.sql` and `v6_1_telemetry_upsert_fix.sql`. It re-issues `psyche_run_daily_batch()` with the V6.1 carry-forward fix already folded in, but does **not** re-issue `calculate_student_telemetry()` — so V6.1 must have been applied first or that function reverts to its buggy form. |
-| **Status** | ✅ Run against **dev** Supabase 2026-07-29 and verified end-to-end (composite math hand-checked against the formula for 3 students; RSI percentiles, tie handling, and course→grade→school fallback all confirmed correct). Not yet run in prod. Its `psyche_compute_rsi_for_student()` is superseded by `v7_1_confidence_gating.sql`. |
+| **⚠ Run order** | Must run **after** `v06_domain_scoring_engine.sql` and `v06_1_telemetry_upsert_fix.sql`. It re-issues `psyche_run_daily_batch()` with the V6.1 carry-forward fix already folded in, but does **not** re-issue `calculate_student_telemetry()` — so V6.1 must have been applied first or that function reverts to its buggy form. |
+| **Status** | ✅ Run against **dev** Supabase 2026-07-29 and verified end-to-end (composite math hand-checked against the formula for 3 students; RSI percentiles, tie handling, and course→grade→school fallback all confirmed correct). Not yet run in prod. Its `psyche_compute_rsi_for_student()` is superseded by `v07_1_confidence_gating.sql`. |
 | **Last Updated** | 2026-07-29 (V7 Composite Score + RSI, per external psychometrics consultant spec; resolves the C↔RSI circular dependency caught in design review) |
 
 ---
 
-### `v7_1_confidence_gating.sql`
+### `v07_1_confidence_gating.sql`
 | Attribute | Value |
 |---|---|
-| **Path** | `/v7_1_confidence_gating.sql` (root) |
+| **Path** | `/database/migrations/v07_1_confidence_gating.sql` |
 | **Load Trigger** | When changing the `CF_C` evidential floor, or debugging why a student has a composite score but no RSI |
 | **Owns** | `CREATE OR REPLACE` of `psyche_compute_rsi_for_student()` only — adds the `composite_confidence >= 0.5` eligibility floor (applied to the ranked student, the cohort-size count, and the worse-than count) and the new `insufficient_confidence` reason code. Composite Score math, ETI, Domain Scoring, and `psyche_run_daily_batch()` are untouched. |
 | **Must NOT Contain** | Application/UI code |
 | **Do NOT modify** unless a formal schema migration is approved by the human |
-| **⚠ Run order** | Must run **after** `v7_composite_rsi_engine.sql`. |
+| **⚠ Run order** | Must run **after** `v07_composite_rsi_engine.sql`. |
 | **⚠ Paired constant** | The `0.5` floor exists in two places and must stay in sync: `c_min_confidence` here, and `MIN_COMPOSITE_CONFIDENCE` in `src/types/index.ts` (which drives the frontend display gate). |
 | **Status** | ⚠ Written 2026-07-29, **not yet executed against Supabase** (dev or prod). The frontend half of this gate is live and verified in dev; the RSI half needs this file to run. |
 | **Last Updated** | 2026-07-29 (fixes a clinical false-positive found in V7 dev verification — see `ARCH_technical-specs.md` §8.6) |
@@ -165,7 +165,7 @@
 ### `LIVING_DOC_SYSTEM.md`
 | Attribute | Value |
 |---|---|
-| **Path** | `/LIVING_DOC_SYSTEM.md` (root) |
+| **Path** | `/docs/LIVING_DOC_SYSTEM.md` |
 | **Load Trigger** | Only when bootstrapping a new session context from scratch, or re-explaining the system to a new agent |
 | **Owns** | The meta-rules governing the entire living doc system (core principles, directory structure ownership definitions) |
 | **Must NOT Contain** | Project-specific rules (those live in the files it defines) |
@@ -207,7 +207,7 @@ is a **local** calendar concept, and the `dedupeFollowUps()` pairing rule that m
 `'Follow-up for: '` prefix written by `AddLog.tsx`.
 
 ### `src/analytics/ColdStart.ts`
-**Purpose:** V5 — `EngineStatus` type + `calculateConfidenceMultiplier()`, the frontend-only display ramp for the "Building profile — N% Confidence" badge. Does not call Supabase; pairs with (but does not duplicate) the SQL-side `psyche_get_engine_status()` in `v5_analytics_migration.sql`.
+**Purpose:** V5 — `EngineStatus` type + `calculateConfidenceMultiplier()`, the frontend-only display ramp for the "Building profile — N% Confidence" badge. Does not call Supabase; pairs with (but does not duplicate) the SQL-side `psyche_get_engine_status()` in `v05_analytics_migration.sql`.
 
 ### `src/types/index.ts`
 **Purpose:** TypeScript interfaces for all 8 database entities and derived UI shapes. Single source of truth for type definitions.
@@ -260,7 +260,7 @@ is a **local** calendar concept, and the `dedupeFollowUps()` pairing rule that m
 | `supabase/functions/_shared/llmProviders.ts` | Raw Groq/Gemini HTTP calls, reasoning-model token headroom, JSON repair pass |
 | `src/lib/aiModels.ts` | **V13** Frontend data access for the model picker (`list-models` + `PsychE_Settings.ai_models`) |
 | `src/components/AIModelSettings.tsx` | **V13** Settings → AI Models tab |
-| `v13_ai_model_settings.sql` | **V13** Adds `PsychE_Settings.ai_models`, widens model-name columns to `VARCHAR(120)`. Folded into `schema/install.sql` |
+| `v13_ai_model_settings.sql` | **V13** Adds `PsychE_Settings.ai_models`, widens model-name columns to `VARCHAR(120)`. Folded into `database/install.sql` |
 
 ---
 
@@ -270,10 +270,10 @@ is a **local** calendar concept, and the `dedupeFollowUps()` pairing rule that m
 
 | File | Status | Notes |
 |---|---|---|
-| `webhook.js` | Standalone, separate deploy target | Express server (`node webhook.js`) exposing `POST /webhook/import` for external student+log bulk import via `PsychE_Students`/`PsychE_Counseling_Logs` upsert. Uses the frontend's `.env` Supabase vars. Not started by `npm run dev`; not documented as deployed anywhere. |
-| `fix_rls.sql` | Superseded, historical | One-off RLS-enable patch for `PsychE_Students`/`PsychE_Counseling_Logs` predating the master schema's own RLS section. Kept for history; the master schema's RLS policies are authoritative now. |
-| `refactor.py` | One-off dev script, already run | Python script that mechanically split `StudentProfile.tsx` into the "Profile & History" / "Telemetry Analytics" tab structure (see `GUIDE_developer.md` §9.2). Its edit has already been applied and committed — running it again against the current file will not match its hardcoded markers. Not part of any build step. |
-| `src/pages/StudentProfile.backup.tsx` | Stray backup, not imported anywhere | Pre-`refactor.py` snapshot of `StudentProfile.tsx`. Not referenced by any route or import. Left in place pending an explicit cleanup request — not removed in this sweep. |
+| `server/webhook.js` | Standalone, separate deploy target | Express server (`node server/webhook.js`) exposing `POST /webhook/import` for external student+log bulk import via `PsychE_Students`/`PsychE_Counseling_Logs` upsert. Uses the frontend's `.env` Supabase vars. Not started by `npm run dev`; not documented as deployed anywhere. |
+| `database/archive/fix_rls.sql` | Superseded, historical | One-off RLS-enable patch for `PsychE_Students`/`PsychE_Counseling_Logs` predating the master schema's own RLS section. Kept for history; the master schema's RLS policies are authoritative now. |
+| `scripts/archive/refactor.py` | One-off dev script, already run | Python script that mechanically split `StudentProfile.tsx` into the "Profile & History" / "Telemetry Analytics" tab structure (see `GUIDE_developer.md` §9.2). Its edit has already been applied and committed — running it again against the current file will not match its hardcoded markers. Not part of any build step. |
+| `src/pages/StudentProfile.backup.tsx` | Stray backup, not imported anywhere | Pre-`scripts/archive/refactor.py` snapshot of `StudentProfile.tsx`. Not referenced by any route or import. Left in place pending an explicit cleanup request — not removed in this sweep. |
 
 ---
 
@@ -308,7 +308,7 @@ If a rule appears in more than one doc file:
 | `docs/GUIDE_developer.md` | Doc — Guide | V3 (bootstrap) |
 | `docs/ARCH_documentation-governance.md` | Doc — Registry | V3 (bootstrap) |
 | `LIVING_DOC_SYSTEM.md` | Doc — Meta-system | V1 (original) |
-| `Master Schema/psyche_v3_master_schema.sql` | Schema — DDL | V3 (compiled from v2–v14) |
+| `database/archive/psyche_v3_master_schema.sql` | Schema — DDL | V3 (compiled from v2–v14) |
 | `src/App.tsx` | Code | V1 |
 | `src/main.tsx` | Code | V1 |
 | `src/types/index.ts` | Code — Types | V3 |
@@ -340,17 +340,17 @@ If a rule appears in more than one doc file:
 | `src/components/ProgrammeHealthPanel.tsx` | Component — presentational | V8 |
 | `src/analytics/operationalDay.ts` | Code — Pure analytics | V6.2 |
 | `src/components/DashboardPanels.tsx` | Component — presentational | V6.2 |
-| `v7_2_eti_followthrough_fix.sql` | Schema — bugfix (function only) | V7.2 |
-| `v7_3_followup_autoclose.sql` | Schema — trigger + function | V7.3 |
-| `v8_programme_health.sql` | Schema — read-only aggregate function | V8 |
-| `v5_migration.sql` | Schema — DDL (unmerged) | V5 |
-| `v5_analytics_migration.sql` | Schema — DDL (unmerged) | V5 |
+| `v07_2_eti_followthrough_fix.sql` | Schema — bugfix (function only) | V7.2 |
+| `v07_3_followup_autoclose.sql` | Schema — trigger + function | V7.3 |
+| `v08_programme_health.sql` | Schema — read-only aggregate function | V8 |
+| `v05_migration.sql` | Schema — DDL (unmerged) | V5 |
+| `v05_analytics_migration.sql` | Schema — DDL (unmerged) | V5 |
 | `.github/workflows/daily_analytics.yml` | Ops — CI cron | V5 |
-| `v6_domain_scoring_engine.sql` | Schema — DDL + function rewrite (unmerged, run in dev) | V6 |
-| `v6_1_telemetry_upsert_fix.sql` | Schema — bugfix (unmerged, run in prod) | V6.1 |
-| `v7_composite_rsi_engine.sql` | Schema — DDL + Composite/RSI engines (unmerged, run in dev) | V7 |
-| `v7_1_confidence_gating.sql` | Schema — RSI confidence floor (unmerged, not yet run) | V7.1 |
-| `webhook.js` | Code — Auxiliary server (not built app) | Pre-V3, undated |
-| `fix_rls.sql` | Schema — Historical patch (superseded) | Pre-V3, undated |
-| `refactor.py` | Code — One-off script (already applied) | V5 |
+| `v06_domain_scoring_engine.sql` | Schema — DDL + function rewrite (unmerged, run in dev) | V6 |
+| `v06_1_telemetry_upsert_fix.sql` | Schema — bugfix (unmerged, run in prod) | V6.1 |
+| `v07_composite_rsi_engine.sql` | Schema — DDL + Composite/RSI engines (unmerged, run in dev) | V7 |
+| `v07_1_confidence_gating.sql` | Schema — RSI confidence floor (unmerged, not yet run) | V7.1 |
+| `server/webhook.js` | Code — Auxiliary server (not built app) | Pre-V3, undated |
+| `database/archive/fix_rls.sql` | Schema — Historical patch (superseded) | Pre-V3, undated |
+| `scripts/archive/refactor.py` | Code — One-off script (already applied) | V5 |
 | `src/pages/StudentProfile.backup.tsx` | Code — Stray backup (unused) | Pre-V5 |

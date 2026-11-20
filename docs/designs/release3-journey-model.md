@@ -1,7 +1,7 @@
 # Release 3: Student journey model
 
 Status: DRAFT for founder review (2026-10-30). Data model only; screens wait for the Release 2 design decisions.
-Migration: `v16_journey.sql` (also in `schema/install.sql`, Section 7.2).
+Migration: `v16_journey.sql` (also in `database/install.sql`, Section 7.2).
 
 ## The flow in one paragraph
 

@@ -35,7 +35,7 @@
 --  psyche_compute_rsi_for_student(). Does not touch the Composite Score
 --  function, the Domain Scoring engine, ETI, or psyche_run_daily_batch()
 --  (which calls this function by name and so picks up the new logic).
---  Run AFTER v7_composite_rsi_engine.sql.
+--  Run AFTER v07_composite_rsi_engine.sql.
 -- =============================================================================
 
 CREATE OR REPLACE FUNCTION psyche_compute_rsi_for_student(p_student_uuid UUID)

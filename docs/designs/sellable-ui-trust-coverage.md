@@ -8,7 +8,7 @@ Mode: Startup
 
 ## Problem Statement
 The founder wants UPsych (PsychE, v6.6.0) to become a product schools buy. Their stated problem was "its UI/UX." The audit and session found three layers, in the order they kill a sale:
-1. **Trust.** Login is a 4-digit PIN checked in the browser, with fallback PINs hard-coded in the shipped bundle (`src/components/PinScreen.tsx:14`) and a `localStorage` "verified" flag. Supabase RLS grants the anonymous role read/write on student and counselling-log tables (`fix_rls.sql`). The anon key ships in the bundle, so minors' counselling records are reachable without logging in.
+1. **Trust.** Login is a 4-digit PIN checked in the browser, with fallback PINs hard-coded in the shipped bundle (`src/components/PinScreen.tsx:14`) and a `localStorage` "verified" flag. Supabase RLS grants the anonymous role read/write on student and counselling-log tables (`database/archive/fix_rls.sql`). The anon key ships in the bundle, so minors' counselling records are reachable without logging in.
 2. **Single-school identity.** "UPsych : GCM Edition" / "GCM Convent School" is hard-coded in 14 places, including printed reports.
 3. **The UI hides the moat.** 7 unlabelled header icons, 1,165 inline style blocks, 51 native `alert()`/`confirm()`, dark-only theme with failing contrast, and the assessment/scoring engine (the reason GCM switched) sits behind an unlabelled icon.
 
@@ -29,7 +29,7 @@ A counselling tab inside the school's existing ERP. It is already paid for, so i
 - Minors' mental-health data, India DPDP Act 2023. Trust must precede polish.
 - Live school (GCM) on the production Supabase project. Auth and RLS cutover uses a short after-hours maintenance window (founder-accepted), not zero-downtime.
 - Stack stays React 19 + Vite + Supabase. Deployed via Coolify from GitHub `main`.
-- **Selling model: one clone per school (founder decision, 2026-10-28).** Each school gets its own Supabase project and its own Coolify deployment, created from GCM's schema (`schema/install.sql`) and configured through that clone's Settings. No shared multi-school database, so no `school_id` now. It gets added only if shared hosting is ever needed (D1 deferral).
+- **Selling model: one clone per school (founder decision, 2026-10-28).** Each school gets its own Supabase project and its own Coolify deployment, created from GCM's schema (`database/install.sql`) and configured through that clone's Settings. No shared multi-school database, so no `school_id` now. It gets added only if shared hosting is ever needed (D1 deferral).
 
 ## Premises
 1. **Trust first (revised after second opinion).** Phase 1 = per-counsellor login with counsellor and principal roles, anon access removed from RLS, school name/logo/accent from Settings. UI polish starts on that base.
@@ -67,7 +67,7 @@ The anon lockdown is urgent. It ships immediately and does not wait for the Assi
   - `admin`: settings, staff and branding, plus everything a counsellor can do. The founder holds this role at GCM.
 - **Clone-ready.**
   - Nothing school-specific lives in code.
-  - A new school is: a new Supabase project from `schema/install.sql`, a new Coolify deployment with that project's env vars, and the school's name, logo and accent set in its Settings.
+  - A new school is: a new Supabase project from `database/install.sql`, a new Coolify deployment with that project's env vars, and the school's name, logo and accent set in its Settings.
   - The demo school is exactly such a clone.
 - **Branding before login.**
   - School name, logo URL and accent live in that clone's single `PsychE_Settings` row.
@@ -161,7 +161,7 @@ Explorations that were rejected (kept for reference only):
 - A principal receives a class screening report and says they would pay for it (Assignment).
 
 ## Distribution Plan
-Existing pipeline: Coolify auto-deploys the frontend from GitHub `main`. Database changes ship as numbered SQL migrations (current pattern `vNN_*.sql`) plus `schema/install.sql`.
+Existing pipeline: Coolify auto-deploys the frontend from GitHub `main`. Database changes ship as numbered SQL migrations (current pattern `vNN_*.sql`) plus `database/install.sql`.
 
 ## Dependencies
 - Phase 1 blocks Phases 2 and 3.

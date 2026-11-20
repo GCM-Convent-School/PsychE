@@ -56,7 +56,7 @@ export const Analytics: React.FC = () => {
       <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>{error}</p>
       <p className="text-muted" style={{ fontSize: '0.78rem', marginTop: '0.5rem' }}>
         If this reads “function psyche_programme_health does not exist”, run
-        <code style={{ margin: '0 0.3rem' }}>v8_programme_health.sql</code> against this database.
+        <code style={{ margin: '0 0.3rem' }}>v08_programme_health.sql</code> against this database.
       </p>
     </div>
   );

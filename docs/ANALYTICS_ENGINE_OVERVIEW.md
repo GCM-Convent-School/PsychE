@@ -302,19 +302,19 @@ carry-forward only ever copies something that genuinely existed.
 
 | Concern | File |
 |---|---|
-| Domain scoring + tension | `v6_domain_scoring_engine.sql` |
-| Cross-engine insert fix | `v6_1_telemetry_upsert_fix.sql` |
-| Cold-start + ETI | `v5_analytics_migration.sql` |
-| Domains table, telemetry table | `v5_migration.sql` |
-| Composite + RSI | `v7_composite_rsi_engine.sql` |
-| RSI confidence floor | `v7_1_confidence_gating.sql` |
+| Domain scoring + tension | `v06_domain_scoring_engine.sql` |
+| Cross-engine insert fix | `v06_1_telemetry_upsert_fix.sql` |
+| Cold-start + ETI | `v05_analytics_migration.sql` |
+| Domains table, telemetry table | `v05_migration.sql` |
+| Composite + RSI | `v07_composite_rsi_engine.sql` |
+| RSI confidence floor | `v07_1_confidence_gating.sql` |
 | Frontend confidence ramp | `src/analytics/ColdStart.ts` |
 | Types | `src/types/index.ts` |
 | All telemetry UI | `src/pages/StudentProfile.tsx` (Telemetry Analytics tab) |
 | Module scoring config | `src/components/LibraryManager.tsx` |
 | Nightly cron | `.github/workflows/daily_analytics.yml` |
 
-> These SQL files are **not** merged into `Master Schema/psyche_v3_master_schema.sql`. Until a formal merge
+> These SQL files are **not** merged into `database/archive/psyche_v3_master_schema.sql`. Until a formal merge
 > is approved, the master schema plus all six migration files together are the canonical schema.
 > **Run order matters:** v5 → v5_analytics → v6 → v6.1 → v7 → v7.1.
 
@@ -359,7 +359,7 @@ computed and stored at any confidence, so the threshold can be changed later wit
 | **Composite weights are provisional** | 0.44/0.28/0.17/0.11 are judgment, not a validated study. Recalibrate against real outcomes. |
 | **`domain_weight` is theoretical** | Assigned by clinical reasoning, not factor-analytically estimated (which needs sample sizes not yet available). |
 | **Grade parsing is a convention, not a constraint** | RSI's grade fallback uses `split_part(course, ' - ', 1)`, assuming `"Class N - <suffix>"`. Verified against all current data, but `course` is freeform `VARCHAR(100)`. Non-conforming data groups inaccurately — not destructively. |
-| **The 0.5 threshold is duplicated** | `MIN_COMPOSITE_CONFIDENCE` (`src/types/index.ts`) and `c_min_confidence` (`v7_1_confidence_gating.sql`) must be kept in sync manually. |
+| **The 0.5 threshold is duplicated** | `MIN_COMPOSITE_CONFIDENCE` (`src/types/index.ts`) and `c_min_confidence` (`v07_1_confidence_gating.sql`) must be kept in sync manually. |
 | **Question authoring is unverifiable by the engine** | Direction-correction only fixes *within-module* semantics. Whoever sets `is_reverse_scored` must ensure higher `q*` always means "more of the construct" — the engine cannot check this from data. |
 | **RLS is wide open** | All policies are `USING (true)` — pre-production only. |
 | **Analytics page is separate** | `src/pages/Analytics.tsx` is school-wide *counting* (risk distribution, session health), unrelated to these per-student engines. |
@@ -377,6 +377,6 @@ computed and stored at any confidence, so the threshold can be changed later wit
 | **V7** | Composite Score + RSI; two-pass batch | ⏳ dev only — verified |
 | **V7.1** | `CF_C ≥ 0.5` evidential floor (display + RSI eligibility) | ⏳ dev only — verified |
 
-**To ship V5.4:** run `v7_composite_rsi_engine.sql` then `v7_1_confidence_gating.sql` in production, then
+**To ship V5.4:** run `v07_composite_rsi_engine.sql` then `v07_1_confidence_gating.sql` in production, then
 deploy the frontend. The frontend degrades gracefully if it lands first — `StudentProfile` uses
 `select('*')`, so absent columns read as `undefined` and the new cards simply don't render.

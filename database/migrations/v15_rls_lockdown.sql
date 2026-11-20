@@ -8,7 +8,7 @@
 -- =============================================================================
 --
 --  Idempotent: it drops EVERY policy on every PsychE table (whatever its name,
---  including fix_rls.sql's "Allow anonymous ..." ones) and recreates the
+--  including database/archive/fix_rls.sql's "Allow anonymous ..." ones) and recreates the
 --  staff-only set, so re-running it always converges to the same state.
 --
 --  ⚠ WHY: Postgres ORs permissive policies together. Adding a staff policy next

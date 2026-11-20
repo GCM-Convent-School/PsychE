@@ -9,7 +9,7 @@ behind.
 Create a Supabase project, open the **SQL Editor**, paste in the whole of:
 
 ```
-schema/install.sql
+database/install.sql
 ```
 
 That is the entire database installation — tables, indexes, RLS, and all nine
@@ -18,7 +18,7 @@ engine functions in one file.
 It is **idempotent**: safe to re-run, and safe to run against a database that
 already has data. It contains no `DROP TABLE`.
 
-> The older `Master Schema/psyche_v3_master_schema.sql` and the `v5_*`–`v8_*`
+> The older `database/archive/psyche_v3_master_schema.sql` and the `v5_*`–`v8_*`
 > files are kept as historical record only — several document real bugs and
 > their fixes. You do not need to run them, and you should not run them *after*
 > `install.sql`, as four functions were superseded along the way.
@@ -65,7 +65,7 @@ VITE_SUPABASE_URL=https://<throwaway-project>.supabase.co
 VITE_SUPABASE_ANON_KEY=<its anon / publishable key>
 ```
 
-Then run `schema/install.sql` against that blank project and:
+Then run `database/install.sql` against that blank project and:
 
 ```bash
 npm run dev:v2      # http://localhost:5174

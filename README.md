@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# PsychE
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Student counselling and wellbeing platform: React + TypeScript + Vite frontend, Supabase (Postgres, Edge Functions, Storage) backend. Each school gets its own clone: its own Supabase project and its own Coolify deployment.
 
-Currently, two official plugins are available:
+## Repository layout
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+.
+├── src/                    Frontend app (pages, components, lib, analytics, types)
+├── public/                 Static assets served as-is
+├── supabase/functions/     Edge Functions (staff-login, generate-ai-report, …) + _shared helpers
+├── database/
+│   ├── install.sql         Complete installer for a fresh Supabase project (source of truth)
+│   ├── migrations/         Numbered upgrades for existing databases (vNN_*.sql)
+│   └── archive/            Superseded SQL, kept for history. Do not run.
+├── server/webhook.js       Standalone Express import server (inert since V15, see docs)
+├── scripts/                Ops scripts (anon-probe.mjs); scripts/archive = one-off, already run
+├── docs/                   Specs, runbooks, install guide, PRD, designs, release notes
+├── .github/workflows/      Scheduled jobs (daily analytics, AI report batch)
+├── agent.md                Entry point for AI coding agents
+└── TODOS.md                Deferred work
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Quick start
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
+
+Needs a `.env.development` with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. `npm run build` type-checks and builds to `dist/`.
+
+## Database
+
+- **New clone:** run `database/install.sql`. See [docs/GUIDE_install.md](docs/GUIDE_install.md).
+- **Existing database:** run the migrations it hasn't had yet, in order. See [database/README.md](database/README.md).
+
+## Docs
+
+| Need | Read |
+|---|---|
+| Install a new school | [docs/GUIDE_install.md](docs/GUIDE_install.md) |
+| Developer guide | [docs/GUIDE_developer.md](docs/GUIDE_developer.md) |
+| Schema and engine specs | [docs/ARCH_technical-specs.md](docs/ARCH_technical-specs.md) |
+| Release 1 rollout | [docs/RUNBOOK_release1.md](docs/RUNBOOK_release1.md) |
+| Product requirements | [docs/PRD.md](docs/PRD.md) |

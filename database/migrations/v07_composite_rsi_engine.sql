@@ -38,8 +38,8 @@
 --  function, so Pass 2's reads correctly see every Pass 1 write for the day.
 --
 --  Idempotent. Adds columns to PsychE_Student_Telemetry; does not touch
---  Domain Scoring (v6_domain_scoring_engine.sql) or its upsert-carry-forward
---  fix (v6_1_telemetry_upsert_fix.sql) — this file builds strictly on top.
+--  Domain Scoring (v06_domain_scoring_engine.sql) or its upsert-carry-forward
+--  fix (v06_1_telemetry_upsert_fix.sql) — this file builds strictly on top.
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
