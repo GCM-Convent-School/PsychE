@@ -20,6 +20,7 @@ File names are zero-padded (`v05` … `v16`) so they sort in run order. `_1`, `_
 | V14 | `v14_staff_auth.sql`, `v14_1_grants.sql` | Staff sign-in, branding, audit |
 | V15 | `v15_rls_lockdown.sql` (undo: `v15_rollback.sql`) | Removes anonymous access. Maintenance window only, see `docs/RUNBOOK_release1.md` |
 | V16 | `v16_journey.sql`, then `v16_backfill.sql` | Journey model (Release 3) |
+| V17 | `v17_backup_log.sql` | Backup log shown in Settings → Backups |
 
 ## Adding a change
 

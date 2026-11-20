@@ -49,7 +49,7 @@ const KNOWN_TABLES = [
   'PsychE_Student_Telemetry', 'PsychE_Student_Notes', 'PsychE_AI_Reports',
   'PsychE_Sanitized_Session_Reports', 'PsychE_Model_Usage_Log', 'PsychE_Formalized_Sessions',
   'PsychE_Courses', 'PsychE_Staff', 'PsychE_Staff_Secrets', 'PsychE_Audit',
-  'PsychE_Cases', 'PsychE_Referrals', 'PsychE_Student_Journey',
+  'PsychE_Cases', 'PsychE_Referrals', 'PsychE_Student_Journey', 'PsychE_Backups',
 ];
 // Real argument names: PostgREST answers 404 for a signature mismatch even when
 // anon COULD execute the function, so a bare {} would pass for the wrong reason.

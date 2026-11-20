@@ -1869,6 +1869,28 @@ END $$;
 
 
 -- =============================================================================
+--  SECTION 7.3 ── Backup log  (= v17)
+--  One row per daily backup run, written by .github/workflows/daily_db_backup.yml
+--  with the service role. Admins read it in Settings → Backups; its policy is
+--  applied in SECTION 7.5.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS "PsychE_Backups" (
+    id           BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    started_at   TIMESTAMPTZ  NOT NULL,
+    finished_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    status       TEXT         NOT NULL CHECK (status IN ('success', 'failed')),
+    trigger      TEXT         NOT NULL DEFAULT 'schedule' CHECK (trigger IN ('schedule', 'manual')),
+    file_name    TEXT,
+    size_bytes   BIGINT,
+    run_url      TEXT,
+    detail       TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_backups_started ON "PsychE_Backups" (started_at DESC);
+GRANT ALL ON "PsychE_Backups" TO service_role;
+
+
+-- =============================================================================
 --  SECTION 7.5 ── Row Level Security lockdown  (= v15)
 --  Runs after the engine functions so their EXECUTE grants can be tightened.
 -- =============================================================================
@@ -1896,7 +1918,7 @@ BEGIN
 
     -- 3. Default: counsellors and admins have full access to student data.
     --    The tables below get their own rules instead.
-    IF t NOT IN ('PsychE_Settings','PsychE_Staff','PsychE_Staff_Secrets','PsychE_Audit') THEN
+    IF t NOT IN ('PsychE_Settings','PsychE_Staff','PsychE_Staff_Secrets','PsychE_Audit','PsychE_Backups') THEN
       EXECUTE format('CREATE POLICY psyche_staff_all ON public.%I FOR ALL TO authenticated
                       USING (psyche_has_student_access()) WITH CHECK (psyche_has_student_access())', t);
     END IF;
@@ -1932,6 +1954,18 @@ BEGIN
                   AND case_id IS NULL AND handled_by IS NULL AND reply_to_teacher IS NULL);
     CREATE POLICY psyche_referrals_teacher_read ON "PsychE_Referrals" FOR SELECT TO authenticated
       USING (psyche_current_role() = 'teacher' AND referred_by = auth.uid());
+  END IF;
+END $$;
+
+
+-- Backup log (V17): admins read; only the backup job (service role) writes.
+DO $$
+BEGIN
+  IF to_regclass('public."PsychE_Backups"') IS NOT NULL THEN
+    REVOKE ALL ON "PsychE_Backups" FROM authenticated;
+    GRANT  SELECT ON "PsychE_Backups" TO authenticated;
+    CREATE POLICY psyche_backups_admin_read ON "PsychE_Backups" FOR SELECT TO authenticated
+      USING (psyche_is_admin());
   END IF;
 END $$;
 

@@ -32,6 +32,9 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Note start time
+        run: echo "STARTED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
       - name: Check secrets are set
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
@@ -75,6 +78,7 @@ jobs:
                   --passphrase-fd 3 3<<<"$BACKUP_PASSPHRASE" -o "$NAME"
           rm -rf backup
           echo "NAME=$NAME" >> "$GITHUB_ENV"
+          echo "SIZE=$(stat -c %s "$NAME")" >> "$GITHUB_ENV"
           echo "Encrypted backup: $NAME ($(stat -c %s "$NAME") bytes)"
 
       - name: Upload
@@ -94,3 +98,35 @@ jobs:
             exit 1
           fi
           echo "Uploaded $NAME (HTTP $code)"
+
+      # Always runs, success or failure, so Settings → Backups shows every run.
+      # Uses the existing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY secrets. A
+      # logging failure only warns: the backup itself is what matters, and the
+      # admin panel flags a missing row as an overdue backup anyway.
+      - name: Record run in admin panel
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_STATUS: ${{ job.status }}
+          EVENT: ${{ github.event_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::warning::SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set; run not recorded"; exit 0
+          fi
+          if [ "$JOB_STATUS" = "success" ]; then STATUS=success; DETAIL=null; else STATUS=failed; DETAIL='"Backup job failed. Open the run for details."'; fi
+          if [ "$EVENT" = "schedule" ]; then TRIGGER=schedule; else TRIGGER=manual; fi
+          body=$(jq -n \
+            --arg started "${STARTED_AT:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}" \
+            --arg status "$STATUS" --arg trigger "$TRIGGER" --arg run_url "$RUN_URL" \
+            --arg file "${NAME:-}" --arg size "${SIZE:-}" --argjson detail "$DETAIL" \
+            '{started_at: $started, status: $status, trigger: $trigger, run_url: $run_url, detail: $detail,
+              file_name: (if $status == "success" and $file != "" then $file else null end),
+              size_bytes: (if $status == "success" and $size != "" then ($size | tonumber) else null end)}')
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$SUPABASE_URL/rest/v1/PsychE_Backups" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" -H "Prefer: return=minimal" \
+            -d "$body")
+          if [ "$code" = "201" ]; then echo "Recorded: $STATUS"; else echo "::warning::Could not record run (HTTP $code). Has v17_backup_log.sql been run?"; fi

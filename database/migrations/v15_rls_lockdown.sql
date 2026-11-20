@@ -42,7 +42,7 @@ BEGIN
 
     -- 3. Default: counsellors and admins have full access to student data.
     --    The tables below get their own rules instead.
-    IF t NOT IN ('PsychE_Settings','PsychE_Staff','PsychE_Staff_Secrets','PsychE_Audit') THEN
+    IF t NOT IN ('PsychE_Settings','PsychE_Staff','PsychE_Staff_Secrets','PsychE_Audit','PsychE_Backups') THEN
       EXECUTE format('CREATE POLICY psyche_staff_all ON public.%I FOR ALL TO authenticated
                       USING (psyche_has_student_access()) WITH CHECK (psyche_has_student_access())', t);
     END IF;
@@ -78,6 +78,18 @@ BEGIN
                   AND case_id IS NULL AND handled_by IS NULL AND reply_to_teacher IS NULL);
     CREATE POLICY psyche_referrals_teacher_read ON "PsychE_Referrals" FOR SELECT TO authenticated
       USING (psyche_current_role() = 'teacher' AND referred_by = auth.uid());
+  END IF;
+END $$;
+
+
+-- Backup log (V17): admins read; only the backup job (service role) writes.
+DO $$
+BEGIN
+  IF to_regclass('public."PsychE_Backups"') IS NOT NULL THEN
+    REVOKE ALL ON "PsychE_Backups" FROM authenticated;
+    GRANT  SELECT ON "PsychE_Backups" TO authenticated;
+    CREATE POLICY psyche_backups_admin_read ON "PsychE_Backups" FOR SELECT TO authenticated
+      USING (psyche_is_admin());
   END IF;
 END $$;
 

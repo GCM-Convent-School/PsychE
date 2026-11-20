@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Settings as SettingsIcon, BookOpen, Tag, Cpu, Users, CalendarClock } from 'lucide-react';
+import { ArrowLeft, Save, Settings as SettingsIcon, BookOpen, Tag, Cpu, Users, CalendarClock, DatabaseBackup } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { getDailyCapacity } from '../lib/capacity';
@@ -9,6 +9,7 @@ import { GlobalTagManager } from '../components/GlobalTagManager';
 import { AIModelSettings } from '../components/AIModelSettings';
 import { StaffManager } from '../components/StaffManager';
 import { RhythmSettings } from '../components/RhythmSettings';
+import { BackupHistory } from '../components/BackupHistory';
 import { useAuth } from '../lib/auth';
 import { refreshBranding } from '../lib/branding';
 
@@ -216,7 +217,7 @@ export const Settings: React.FC = () => {
   const navigate = useNavigate();
   const { staff } = useAuth();
   const isAdmin = staff?.role === 'admin';
-  const [activeTab, setActiveTab] = useState<'system' | 'rhythm' | 'library' | 'tags' | 'ai' | 'staff'>(isAdmin ? 'system' : 'library');
+  const [activeTab, setActiveTab] = useState<'system' | 'rhythm' | 'library' | 'tags' | 'ai' | 'staff' | 'backups'>(isAdmin ? 'system' : 'library');
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" style={{ padding: '1rem 0', maxWidth: '1000px', margin: '0 auto' }}>
@@ -247,6 +248,7 @@ export const Settings: React.FC = () => {
           { id: 'library', label: 'Question Library',  Icon: BookOpen,     adminOnly: false },
           { id: 'tags',    label: 'Global Tags',       Icon: Tag,          adminOnly: false },
           { id: 'ai',      label: 'AI Models',         Icon: Cpu,          adminOnly: true },
+          { id: 'backups', label: 'Backups',           Icon: DatabaseBackup, adminOnly: true },
         ] as const).filter(({ adminOnly }) => isAdmin || !adminOnly).map(({ id, label, Icon }) => (
           <button
             key={id}
@@ -284,6 +286,7 @@ export const Settings: React.FC = () => {
       {activeTab === 'library' && <LibraryManager />}
       {activeTab === 'tags' && <GlobalTagManager />}
       {isAdmin && activeTab === 'ai' && <AIModelSettings />}
+      {isAdmin && activeTab === 'backups' && <BackupHistory />}
 
     </motion.div>
   );
