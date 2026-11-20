@@ -26,3 +26,14 @@ File names are zero-padded (`v05` … `v16`) so they sort in run order. `_1`, `_
 1. Add `migrations/vNN_short_name.sql` (next number, two digits).
 2. Fold the same change into `install.sql` so new clones get it.
 3. Run `node scripts/anon-probe.mjs <env file>` after applying it.
+
+## Backups
+
+`.github/workflows/daily_db_backup.yml` runs every day at 03:30 IST (and on demand from the Actions tab). It dumps roles, schema and data with the Supabase CLI, packs them into `psyche-db-YYYY-MM-DD.tar.gz.gpg` (AES-256, passphrase in the `BACKUP_PASSPHRASE` secret) and uploads it to the Google Apps Script endpoint in `BACKUP_UPLOAD_URL`. Storage files (branding logos) are not included. Old backups are not deleted automatically, so prune the Drive folder from time to time.
+
+To restore into a project:
+
+```bash
+mkdir -p restore && gpg -d psyche-db-2026-11-20.tar.gz.gpg | tar -xzf - -C restore/
+psql "$TARGET_DB_URL" -f restore/roles.sql -f restore/schema.sql -c 'SET session_replication_role = replica' -f restore/data.sql
+```

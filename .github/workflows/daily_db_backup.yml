@@ -1,0 +1,96 @@
+name: Daily Database Backup
+
+# Dumps the Supabase database once a day, encrypts it, and uploads it to the
+# Google Apps Script upload endpoint. This repo is PUBLIC, so:
+#   - the upload URL lives only in the BACKUP_UPLOAD_URL secret, never here;
+#   - the dump is encrypted before it leaves the runner (the data is student
+#     counselling records);
+#   - nothing from the dump or the endpoint's response is printed to the log.
+#
+# Required repo secrets:
+#   SUPABASE_DB_URL     Session-pooler connection string (port 5432), from
+#                       Supabase → Connect → Session pooler, with the password.
+#   BACKUP_PASSPHRASE   Encryption passphrase. Keep a copy somewhere safe:
+#                       without it the backups cannot be opened.
+#   BACKUP_UPLOAD_URL   The Apps Script /exec URL.
+#
+# Restore: see database/README.md ("Backups").
+
+on:
+  schedule:
+    # 22:00 UTC is 03:30 AM IST, after the 03:00 analytics batch.
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check secrets are set
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          BACKUP_UPLOAD_URL: ${{ secrets.BACKUP_UPLOAD_URL }}
+        run: |
+          missing=0
+          for name in SUPABASE_DB_URL BACKUP_PASSPHRASE BACKUP_UPLOAD_URL; do
+            if [ -z "${!name}" ]; then echo "::error::Secret $name is not set"; missing=1; fi
+          done
+          exit $missing
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Dump roles, schema and data
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f backup/roles.sql --role-only
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f backup/schema.sql
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f backup/data.sql --use-copy --data-only
+          # Sanity check: an empty dump means something went wrong upstream.
+          for f in roles schema data; do
+            test -s "backup/$f.sql" || { echo "::error::backup/$f.sql is empty"; exit 1; }
+          done
+          ls -la backup | awk '{print $5, $9}'
+
+      - name: Compress and encrypt
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y-%m-%d)
+          NAME="psyche-db-$STAMP.tar.gz.gpg"
+          tar -czf - -C backup . \
+            | gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 \
+                  --passphrase-fd 3 3<<<"$BACKUP_PASSPHRASE" -o "$NAME"
+          rm -rf backup
+          echo "NAME=$NAME" >> "$GITHUB_ENV"
+          echo "Encrypted backup: $NAME ($(stat -c %s "$NAME") bytes)"
+
+      - name: Upload
+        env:
+          BACKUP_UPLOAD_URL: ${{ secrets.BACKUP_UPLOAD_URL }}
+        run: |
+          set -euo pipefail
+          # Apps Script answers a POST with a 302 to the script's output; -L
+          # follows it. The response body is kept out of the public log.
+          code=$(base64 -w0 "$NAME" \
+            | curl -sL --retry 3 --retry-all-errors --max-time 600 \
+                -o response.txt -w '%{http_code}' \
+                --data-binary @- \
+                "$BACKUP_UPLOAD_URL?app=psyche&file=$NAME")
+          if [ "$code" != "200" ] || grep -qiE '"(ok|success)"[[:space:]]*:[[:space:]]*false|error|exception' response.txt; then
+            echo "::error::Upload failed (HTTP $code)"
+            exit 1
+          fi
+          echo "Uploaded $NAME (HTTP $code)"
